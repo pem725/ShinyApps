@@ -35,20 +35,24 @@ ui <- fluidPage(
                             c("Study 3" = 3,
                               "Study 4" = 4,
                               "Study 5" = 5),
-                            selected = 5) #,
+                            selected = 5)), #,
         #radioButtons("boot", "Bootstrap Results?:",
         #            c("Yes" = "y",
         #              "No" = "n")),
         # conditionalPanel(condition = "input.boot == 'y'",
         #                  sliderInput("reps","Number of Samples:", min = 1, max = 10000, value=1000))
-      ),
+        #),
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("Plots")
+        tabsetPanel(
+          tabPanel("Model Curves",plotOutput("p1")),
+          tabPanel("Vignette Curves",plotOutput("p2")),
+          tabPanel("Interaction Plot",plotOutput("p3")),
+          tabPanel("Measure by Vignette",plotOutput("p4"))
       )
    )
-)
+))
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {

@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+ShinyApps.Rproj
+*.sav
+log/
+*.log
