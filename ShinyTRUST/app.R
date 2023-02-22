@@ -11,6 +11,9 @@ library(shiny)
 library(ggplot2)
 library(gridExtra)
 
+# Load Data
+dat <- read.csv("AllTrustShiny.csv")
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
@@ -60,18 +63,30 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output){
-   
    x <- reactive({
-      dat <- read.csv("AllTrustShiny.csv")
-      d1 <- dat[dat$source %in% input$source & dat$study %in% input$study,]
-      d1[sample(1:nrow(d1),round((input$Nperc/100)*nrow(d1))),]
+     req(input$source, input$study, input$Nperc)
+     validate(need(!is.na(input$source) & !is.na(input$study) & input$Nperc > 0))
+     dat %>% filter(
+       source %in% input$source,
+       study %in% input$study
+     ) %>% sample_frac(
+       prop = input$Nperc/100
+     )
+      #dat <- read.csv("AllTrustShiny.csv")
+      #d1 <- dat[dat$source %in% input$source & dat$study %in% input$study,]
+      #d1[sample(1:nrow(d1),round((input$Nperc/100)*nrow(d1))),]
    })
    
    x.l <- reactive({
-     d2 <- read.csv("AllTrustShiny.csv")
-     d2 <- d2[d2$source %in% input$source & d2$study %in% input$study,]
-     d3 <- d2[sample(1:nrow(d2),round((input$Nperc/100)*nrow(d2))),]
-     reshape(d3,varying=names(d3[c(3:6,9)]),new.row.names=1:(nrow(d3)*5),v.names="value",timevar="Measure",times=c("G","U1","U2","R","U3"),idvar=c("id","scen"),direction="long")
+     req(input$source, input$study, input$Nperc)
+     validate(need(!is.na(input$source) & !is.na(input$study) & input$Nperc > 0))
+     xl <- dat %>% filter(
+       source %in% input$source,
+       study %in% input$study
+     ) %>% sample_frac(
+       prop = input$Nperc/100
+     )
+     reshape(xl,varying=names(xl[c(3:6,9)]),new.row.names=1:(nrow(xl)*5),v.names="value",timevar="Measure",times=c("G","U1","U2","R","U3"),idvar=c("id","scen"),direction="long")
    })
    
    model <- lm(T~G:U1:R,data=x())
