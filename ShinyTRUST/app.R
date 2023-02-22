@@ -68,7 +68,10 @@ server <- function(input, output){
    })
    
    x.l <- reactive({
-      reshape(x(),varying=names(x()[c(3:6,9)]),new.row.names=1:(nrow(x())*5),v.names="value",timevar="Measure",times=c("G","U1","U2","R","U3"),idvar=c("id","scen"),direction="long")
+     d2 <- read.csv("AllTrustShiny.csv")
+     d2 <- d2[d2$source %in% input$source & d2$study %in% input$study,]
+     d3 <- d2[sample(1:nrow(d2),round((input$Nperc/100)*nrow(d2))),]
+     reshape(d3,varying=names(d3[c(3:6,9)]),new.row.names=1:(nrow(d3)*5),v.names="value",timevar="Measure",times=c("G","U1","U2","R","U3"),idvar=c("id","scen"),direction="long")
    })
    
    model <- lm(T~G:U1:R,data=x())
