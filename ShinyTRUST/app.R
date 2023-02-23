@@ -55,8 +55,8 @@ ui <- fluidPage(
           tabPanel("Model Curves",plotOutput("p1")),
           tabPanel("Vignette Curves",plotOutput("p2")),
           tabPanel("Interaction Plot",plotOutput("p3")),
-          tabPanel("Measure by Vignette",plotOutput("p4")),
-          tabPanel("All Plots",plotOutput("p5"))
+          tabPanel("Measure by Vignette",plotOutput("p4"))#,
+          #tabPanel("All Plots",plotOutput("p5"))
                    )
       )
    )
@@ -140,7 +140,7 @@ server <- function(input, output){
      ggplot(x.l(),aes(x=as.factor(scen),y=value,colour=Measure))+geom_boxplot() + xlab("Scenario") + ylab("Level (0-10)")
    })
      
-   output$p5 <- renderPlot({grid.arrange(p1, p2, p3, p4)})
+   # output$p5 <- renderPlot({grid.arrange(p1, p2, p3, p4)})
 }
 
 # Run the application 
