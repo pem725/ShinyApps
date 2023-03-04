@@ -1,9 +1,5 @@
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
+# 
 #    http://shiny.rstudio.com/
 #
 
@@ -11,6 +7,7 @@ library(shiny)
 library(ggplot2)
 library(gridExtra)
 library(tidyverse)
+library(gtsummary)
 
 # Load Data
 dat <- read.csv("./AllTrustShiny.csv")
@@ -52,6 +49,7 @@ ui <- fluidPage(
       # Show a plot of the generated distribution
       mainPanel(
         tabsetPanel(
+          tabPanel("Model Summary",tableOutput("lmModel")),
           tabPanel("Model Curves",plotOutput("p1")),
           tabPanel("Vignette Curves",plotOutput("p2")),
           tabPanel("Interaction Plot",plotOutput("p3")),
@@ -77,7 +75,7 @@ server <- function(input, output){
   
   x <- reactive({
     req(input$source, input$study, input$Nperc)
-    dx <- dat %>% filter(
+    dat %>% filter(
       source %in% input$source,
       study %in% input$study
     ) %>% sample_frac(
@@ -99,11 +97,12 @@ server <- function(input, output){
      reshape(xl,varying=names(xl[c(3:6,9)]),new.row.names=1:(nrow(xl)*5),v.names="value",timevar="Measure",times=c("G","U1","U2","R","U3"),idvar=c("id","scen"),direction="long")
    })
    
-   #model <- lm(T~G:U1:R,data=dx)
-   # lm.out <- reactive({
-   #   
-   # })
-   
+   output$lmModel <- renderTable({
+     tbl_regression(lm(T~G:U1:R,data=x()),
+                    label=list(T ~ "Trust (SR)", G ~ "Goal Importance", U1 ~ "Outcome Uncertainty (P(goal))", R ~ "Reliance upon agent"),
+     )
+   })
+
    #print(summary(model))
    #p1 <- ggplot(xl.l,aes(x=T,y=value,colour=Measure)) + geom_smooth()
    #p2 <- ggplot(xl.l,aes(x=T,y=value,colour=Measure)) + geom_smooth() + facet_wrap(~scen)
