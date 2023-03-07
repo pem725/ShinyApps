@@ -7,6 +7,7 @@ library(shiny)
 library(ggplot2)
 library(gridExtra)
 library(tidyverse)
+library(gt)
 library(gtsummary)
 
 # Load Data
@@ -60,7 +61,7 @@ ui <- fluidPage(
    )
 )
 
-#input <- list(source=c("SONA"),study=c(3,4,5), Nperc=c(50))
+input <- list(source=c("SONA"),study=c(3,4,5), Nperc=c(50))
 
 # Define server logic required to draw a histogram
 server <- function(input, output){
@@ -97,10 +98,10 @@ server <- function(input, output){
      reshape(xl,varying=names(xl[c(3:6,9)]),new.row.names=1:(nrow(xl)*5),v.names="value",timevar="Measure",times=c("G","U1","U2","R","U3"),idvar=c("id","scen"),direction="long")
    })
    
-   output$lmModel <- renderTable({
-     tbl_regression(lm(T~G:U1:R,data=x()),
-                    label=list(T ~ "Trust (SR)", G ~ "Goal Importance", U1 ~ "Outcome Uncertainty (P(goal))", R ~ "Reliance upon agent"),
-     )
+   output$lmModel <- render_gt({
+     lm(T~G*U1*R,data=x()) %>%
+       tbl_regression(label=list(G ~ "Goal Importance", U1 ~ "Outcome Uncertainty (P(goal))", R ~ "Reliance upon agent")) %>%
+       as_gt()
    })
 
    #print(summary(model))
