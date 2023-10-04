@@ -77,6 +77,7 @@ server <- function(input, output){
   
   x <- reactive({
     req(input$source, input$study, input$Nperc)
+    dat$GU1R <- dat$G*dat$U1*dat$R # the gate model variable
     dat %>% filter(
       source %in% input$source,
       study %in% input$study
@@ -100,9 +101,9 @@ server <- function(input, output){
    })
    
    output$lmModel <- render_gt({
-     lm(T~G*U1*R,data=x()) %>%
-       tbl_regression(label=list(G ~ "Goal Importance", U1 ~ "Outcome Uncertainty (P(goal))", R ~ "Reliance upon agent")) %>%
-       as_gt()
+     glm(B~T+T:GU1R,data=x()) %>%
+       tbl_regression(labels=list(T ~ "Self-Reported Trust", GU1R ~ "The Gate Variable"), exponentiate = T) %>%
+       as_gt()  #  G ~ "Goal Importance", U1 ~ "Goal Uncertainty", R ~ "Reliance on Agent"
    })
 
    #print(summary(model))
