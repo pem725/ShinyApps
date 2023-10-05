@@ -8,7 +8,14 @@
 # github: pem725
 #
 
+# RS: 10/5/23 @ 5:11am -  continue on with front end
+#     start with the actual sampling soon.
+
 library(shiny)
+## library(shinymaterial) # too much work and refactoring - KISS
+library(shiny.semantic)
+# https://github.com/Appsilon/shiny.semantic
+# https://fomantic-ui.com/
 
 ## Let's setup some control features here
 
@@ -17,17 +24,18 @@ modsAvail <- c("t-test", "ANOVA", "Regression", "Generalized Linear Model", "LME
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- material_page(
 
     # Application title
-    titlePanel("Pick Your Model"),
+    titlePanel("Power Estimates by Simulation"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
             radioButtons("modSel",
                         "Select the Model that Best Fits YOUR Needs",
-                        modsAvail)
+                        modsAvail),
+            img(src="MRES2wbg.png",height=72), "Product of the ", span("MRES lab", style="color:blue")
         ),
 
         # Show a plot of the generated distribution
@@ -41,14 +49,11 @@ ui <- fluidPage(
 server <- function(input, output) {
 
     output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
+        
         # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+        hist(rnorm(1000), col = 'darkgray', border = 'white',
+             xlab = 'Some random normal value (mu=0, sigma=1, N = 1000)',
+             main = 'Histogram')
     })
 }
 
