@@ -24,7 +24,7 @@ modsAvail <- c("t-test", "ANOVA", "Regression", "Generalized Linear Model", "LME
 
 
 # Define UI for application that draws a histogram
-ui <- material_page(
+ui <- semantic_page(
 
     # Application title
     titlePanel("Power Estimates by Simulation"),
