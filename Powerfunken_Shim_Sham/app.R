@@ -13,7 +13,7 @@
 
 library(shiny)
 ## library(shinymaterial) # too much work and refactoring - KISS
-library(shiny.semantic)
+#library(shiny.semantic)
 # https://github.com/Appsilon/shiny.semantic
 # https://fomantic-ui.com/
 
@@ -24,6 +24,7 @@ library('knitr')
 library('nlme')
 library('lavaan')
 library('dplyr')
+library(bslib)
 ### now do the sim stuff
 # create user-defined function to generate and analyze data
 
@@ -40,30 +41,29 @@ t_func <- function(simNum, N, d) {
 
 ## run_test is our simulation engine
 
-power_ttest <- run_test(t_func, n.iter=5000, output='data.frame', N=50, d=.5)  # simulate data
+#power_ttest <- run_test(t_func, n.iter=5000, output='data.frame', N=50, d=.5)  # simulate data
 
-results(power_ttest) %>%
-  summarise(power=mean(sig))
+#results(power_ttest) %>% summarise(power=mean(sig))
 
-power_ttest_vary <- grid_search(t_func, params=list(N=c(25, 50, 100)),
-                                n.iter=5000, output='data.frame', d=.5)
-results(power_ttest_vary) %>%
-  group_by(N.test) %>%
-  summarise(power=mean(sig))
+#power_ttest_vary <- grid_search(t_func, params=list(N=c(25, 50, 100)),
+#                                n.iter=5000, output='data.frame', d=.5)
+#results(power_ttest_vary) %>%
+#  group_by(N.test) %>%
+#  summarise(power=mean(sig))
 
 # varying N and Cohen's d
-power_ttest_vary2 <- grid_search(t_func, params=list(N=c(25, 50, 100), d=c(.2, .5)),
-                                 n.iter=5000, output='data.frame')
-power <- results(power_ttest_vary2) %>%
-  group_by(N.test, d.test) %>%
-  summarise(power=mean(sig))
-print(power)
-ggplot(power, aes(x=N.test, y=power, group=factor(d.test), colour=factor(d.test))) +
-  geom_point() +
-  geom_line() +
-  ylim(c(0, 1)) +
-  labs(x='Sample Size', y='Power', colour="Cohen's d") +
-  theme_minimal()
+#power_ttest_vary2 <- grid_search(t_func, params=list(N=c(25, 50, 100), d=c(.2, .5)),
+#                                 n.iter=5000, output='data.frame')
+#power <- results(power_ttest_vary2) %>%
+#  group_by(N.test, d.test) %>%
+#  summarise(power=mean(sig))
+#print(power)
+#ggplot(power, aes(x=N.test, y=power, group=factor(d.test), colour=factor(d.test))) +
+#  geom_point() +
+#  geom_line() +
+#  ylim(c(0, 1)) +
+#  labs(x='Sample Size', y='Power', colour="Cohen's d") +
+#  theme_minimal()
 
 
 ## Let's setup some control features here
@@ -74,9 +74,25 @@ modsAvail <- c("t-test", "ANOVA", "Regression", "Generalized Linear Model", "LME
 
 # Define UI for application that draws a histogram
 ui <- page_sidebar(
+  title = "Power to the People",
   theme = bs_theme(bootswatch = "minty"),
   sidebar = sidebar(
-    varSelectInput
+    selectInput("modsAvail","Select Stat Model", modsAvail),
+    conditionalPanel(
+      condition = "input.modsAvail == 't-test'",
+      sliderInput("ExpES","Expected Effect size", min=0,max=3,value=.1,step=.1,animate = T),
+      sliderInput("pCrit","Alpha level?",min=.001,max=.1,value=.05,step=.01,animate=T),
+      sliderInput("ExpN","Expected Sample Size", min=2, max=1500, value=250, step=20, animate=T)
+      ),
+    conditionalPanel(
+      condition = "input.modsAvail == 'ANOVA'",
+      
+    )
+  ),
+  card(
+    full_screen = TRUE,
+    card_header("A plot of some sort"),
+    plotOutput("p1")
   )
 
   
@@ -85,25 +101,25 @@ ui <- page_sidebar(
     #titlePanel("Power Estimates by Simulation"),
 
     # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            radioButtons("modSel",
-                        "Select the Model that Best Fits YOUR Needs",
-                        modsAvail),
-            img(src="MRES2wbg.png",height=72), "Product of the ", span("MRES lab", style="color:blue")
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
+    # sidebarLayout(
+    #     sidebarPanel(
+    #         radioButtons("modSel",
+    #                     "Select the Model that Best Fits YOUR Needs",
+    #                     modsAvail),
+    #         img(src="MRES2wbg.png",height=72), "Product of the ", span("MRES lab", style="color:blue")
+    #     ),
+    # 
+    #     # Show a plot of the generated distribution
+    #     mainPanel(
+    #        plotOutput("distPlot")
+    #     )
+    # ) 
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
+    output$p1 <- renderPlot({
         
         # draw the histogram with the specified number of bins
         hist(rnorm(1000), col = 'darkgray', border = 'white',
