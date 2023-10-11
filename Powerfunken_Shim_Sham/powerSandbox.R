@@ -199,3 +199,12 @@ results(power_mlm) %>%
     power=mean(sig, na.rm=TRUE),
     na=sum(is.na(sig)))  # we use this to count up how many cases did not properly converge
 
+
+for (i in 1:100){
+  print(ggplot() + geom_histogram(aes(scale(rbeta(100000,i,100-i+1)*10))) + xlim(-5,5))
+}
+
+hist(rbeta(100000,100,1)*10)
+#right skewness 
+hist(rbeta(100000,1,100)*10)
+

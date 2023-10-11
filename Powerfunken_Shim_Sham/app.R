@@ -17,6 +17,55 @@ library(shiny.semantic)
 # https://github.com/Appsilon/shiny.semantic
 # https://fomantic-ui.com/
 
+library('paramtest')
+library('pwr')
+library('ggplot2')
+library('knitr')
+library('nlme')
+library('lavaan')
+library('dplyr')
+### now do the sim stuff
+# create user-defined function to generate and analyze data
+
+## functions used later
+t_func <- function(simNum, N, d) {
+  x1 <- rnorm(N, 0, 1)
+  x2 <- rnorm(N, d, 1)
+  t <- t.test(x1, x2, var.equal=TRUE)  # run t-test on generated data
+  stat <- t$statistic
+  p <- t$p.value
+  return(c(t=stat, p=p, sig=(p < .05)))
+  # return a named vector with the results we want to keep
+}
+
+## run_test is our simulation engine
+
+power_ttest <- run_test(t_func, n.iter=5000, output='data.frame', N=50, d=.5)  # simulate data
+
+results(power_ttest) %>%
+  summarise(power=mean(sig))
+
+power_ttest_vary <- grid_search(t_func, params=list(N=c(25, 50, 100)),
+                                n.iter=5000, output='data.frame', d=.5)
+results(power_ttest_vary) %>%
+  group_by(N.test) %>%
+  summarise(power=mean(sig))
+
+# varying N and Cohen's d
+power_ttest_vary2 <- grid_search(t_func, params=list(N=c(25, 50, 100), d=c(.2, .5)),
+                                 n.iter=5000, output='data.frame')
+power <- results(power_ttest_vary2) %>%
+  group_by(N.test, d.test) %>%
+  summarise(power=mean(sig))
+print(power)
+ggplot(power, aes(x=N.test, y=power, group=factor(d.test), colour=factor(d.test))) +
+  geom_point() +
+  geom_line() +
+  ylim(c(0, 1)) +
+  labs(x='Sample Size', y='Power', colour="Cohen's d") +
+  theme_minimal()
+
+
 ## Let's setup some control features here
 
 ## options for models
@@ -24,10 +73,16 @@ modsAvail <- c("t-test", "ANOVA", "Regression", "Generalized Linear Model", "LME
 
 
 # Define UI for application that draws a histogram
-ui <- semantic_page(
+ui <- page_sidebar(
+  theme = bs_theme(bootswatch = "minty"),
+  sidebar = sidebar(
+    varSelectInput
+  )
 
+  
+  
     # Application title
-    titlePanel("Power Estimates by Simulation"),
+    #titlePanel("Power Estimates by Simulation"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
