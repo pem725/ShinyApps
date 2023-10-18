@@ -24,7 +24,7 @@ library('knitr')
 library('nlme')
 library('lavaan')
 library('dplyr')
-library(bslib)
+library(bslib) # the prime driver here for UI
 ### now do the sim stuff
 # create user-defined function to generate and analyze data
 
@@ -69,7 +69,7 @@ t_func <- function(simNum, N, d) {
 ## Let's setup some control features here
 
 ## options for models
-modsAvail <- c("t-test", "ANOVA", "Regression", "Generalized Linear Model", "LMER", "CFA", "SEM")
+modsAvail <- c("Demonstration","t-test")#, "ANOVA", "Regression", "Generalized Linear Model", "LMER", "CFA", "SEM")
 
 
 # Define UI for application that draws a histogram
@@ -79,20 +79,31 @@ ui <- page_sidebar(
   sidebar = sidebar(
     selectInput("modsAvail","Select Stat Model", modsAvail),
     conditionalPanel(
+      condition = "input.modsAvail == 'Demonstration'",
+      sliderInput("Ndemo","Sample Size", min=1, max=1000, value=150, step=50, animate=T),
+      sliderInput("MUdemo", "Mean", min = 0, max = 6, value=0, step=.1, animate=T),
+      sliderInput("SDdemo", "SD", min = 0, max = 6, value=0, step=.1, animate=T),
+      sliderInput("Rel","Reliability of Measure", min=.0001, max=1, value = .7, step = .01, animate = T)
+    ),
+    conditionalPanel(
       condition = "input.modsAvail == 't-test'",
       sliderInput("ExpES","Expected Effect size", min=0,max=3,value=.1,step=.1,animate = T),
       sliderInput("pCrit","Alpha level?",min=.001,max=.1,value=.05,step=.01,animate=T),
       sliderInput("ExpN","Expected Sample Size", min=2, max=1500, value=250, step=20, animate=T)
-      ),
-    conditionalPanel(
-      condition = "input.modsAvail == 'ANOVA'",
-      
-    )
+      )#,
+    #conditionalPanel(
+    #  condition = "input.modsAvail == 'ANOVA'",
+    #  
+    #)
   ),
-  card(
-    full_screen = TRUE,
-    card_header("A plot of some sort"),
-    plotOutput("p1")
+  cards <- list(
+    card(
+      full_screen = TRUE,
+      card_header("A plot of some sort"),
+      plotOutput("p1")  
+    ),
+    
+    
   )
 
   
