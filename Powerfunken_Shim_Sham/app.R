@@ -81,9 +81,9 @@ ui <- page_sidebar(
     conditionalPanel(
       condition = "input.modsAvail == 'Demonstration'",
       sliderInput("Ndemo","Sample Size", min=1, max=1000, value=150, step=50, animate=T),
-      sliderInput("MUdemo", "Mean", min = 0, max = 6, value=0, step=.1, animate=T),
-      sliderInput("SDdemo", "SD", min = 0, max = 6, value=0, step=.1, animate=T),
-      sliderInput("Rel","Reliability of Measure", min=.0001, max=1, value = .7, step = .01, animate = T)
+      sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5, step=1, animate=T),
+      sliderInput("SDdemo", "SD", min = 0, max = 15, value=5, step=.25, animate=T),
+      sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .7, step = .01, animate = T)
     ),
     conditionalPanel(
       condition = "input.modsAvail == 't-test'",
@@ -96,15 +96,30 @@ ui <- page_sidebar(
     #  
     #)
   ),
-  cards <- list(
-    card(
+  layout_columns(
+    fill = FALSE,
+    
+  value_box(
+      title = "Statistical Power (a priori)",
+      value = textOutput("powerpe"),
+      showcase = bsicons::bs_icon("battery-charging"),
+      theme = "teal"    
+  ),
+  value_box(
+    title = "Statistical Power (post-hoc)",
+    value = textOutput("powerph"),
+    showcase = bsicons::bs_icon("battery-charging"),
+    theme = "pink"  
+  )),
+  #cards <- list(
+  card(
       full_screen = TRUE,
-      card_header("A plot of some sort"),
+      card_header("A one-group t-test"),
       plotOutput("p1")  
-    ),
+    )
+  
     
-    
-  )
+  #)
 
   
   
@@ -130,14 +145,31 @@ ui <- page_sidebar(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-    output$p1 <- renderPlot({
-        
-        # draw the histogram with the specified number of bins
-        hist(rnorm(1000), col = 'darkgray', border = 'white',
-             xlab = 'Some random normal value (mu=0, sigma=1, N = 1000)',
-             main = 'Histogram')
-    })
-}
+  genDat <- reactive({
+    if(input$modsAvail == "Demonstration"){
+      data.frame(obs=1:input$Ndemo, x=rnorm(input$Ndemo, input$MUdemo, sqrt((input$SDdemo^2)/input$Rel)))
+    }
+  })
+  
+  output$p1 <- renderPlot({
+      # draw the histogram with the specified number of bins
+      ggplot(genDat(),aes(x=x)) + 
+         geom_histogram(aes(y = ..density..)) +
+         geom_density(fill = "#56B4E9", alpha=.2) +
+         geom_vline(aes(xintercept = 0), color = "blue", linetype = "dashed", size = 1) +
+         geom_vline(aes(xintercept = mean(x)), color = "red", size = 1) +
+         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))), xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))), ymin=0, ymax = Inf), alpha = .2, fill = "red")
+  })
+  
+  output$powerpe <- renderText({ # power point estimate
+    round(power.t.test(input$Ndemo, input$MUdemo, input$SDdemo)$power,2)
+  })
+  
+  output$powerph <- renderText({ # power point estimate
+    round(power.t.test(input$Ndemo, input$MUdemo, sqrt((input$SDdemo^2)/input$Rel))$power,2)
+  })
+  
+} # end server section
 
 # Run the application 
 shinyApp(ui = ui, server = server)
