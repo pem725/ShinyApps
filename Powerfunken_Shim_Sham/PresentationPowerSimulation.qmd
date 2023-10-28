@@ -1,0 +1,81 @@
+---
+title: "Simulating data to estimate power:  Level up from G*Power"
+author: "Patrick E. McKnight & MRES"
+format: html
+server: shiny
+---
+
+Power - the probably of success in the frequentist world - gets attention mostly out of necessity. Many see power analyses as a hurdle to get funding while others treat it as privileged domain for the technically capable. Neither reality need be true in this brave new world. We plan to shed a different light on the topic by demonstrating power analysis by simulation. No, we are not using large language models to estimate power but we are using the power of randomization to generate data and, in turn, power estimates. You will learn that you too can do the very same with little to no technical knowledge. Come, learn, and later teach us after you perfect the techniques.
+
+Before we talk about power, we need to address null hypothesis significance testing (NHST). Why? Well, power is the probabiliity of success in the NHST world and really only in that world. If you don't understand that world then how can you understand power? You can't. So, let's dive into this world first.
+
+# NHST
+
+The world of social science statistics largely revolves around the same ideas. We have a theory (Dogs are superior to cats).
+
+$$
+Dog >> cat
+$$
+
+That theory gets translated into an operation (Dog people are better than cat people).
+
+$$
+H: \bar{X}_{Dog} > \bar{X}_{cat}
+$$
+
+That operation is what we hope to discover as different to support our hypothesis that dogs are superior to cats. It wouldn't matter what measure you collected, dogs would always outperform cats.
+
+BUT we don't test that difference directly. Instead, we test the null. What is the null you ask? The null is really the nil or, quite simply that there is no difference (Dog people are equal to cat people).
+
+$$
+H_0: \bar{X}_{Dog} = \bar{X}_{cat}
+$$
+
+Now, why would we do this? Good question that is beyond the reach of this presentation. Since we do it, let's learn it. The null hypothesis is:
+
+$$
+P(Result | H_0)
+$$
+
+What does that mean?
+
+$$
+P(): \mbox{Probablity computed}
+$$
+
+$$
+Result:  \mbox{Statistic computed}
+$$
+
+$$
+H_0: \mbox{Null Hypothesis}
+$$
+
+```{r}
+
+```
+
+## Shiny Documents
+
+This Quarto document is made interactive using Shiny. Interactive documents allow readers to modify parameters and see the results immediately. Learn more about Shiny interactive documents at <https://quarto.org/docs/interactive/shiny/>.
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change. This demonstrates how a standard R plot can be made interactive:
+
+```{r}
+sliderInput("bins", "Number of bins:", 
+            min = 1, max = 50, value = 30)
+plotOutput("distPlot")
+```
+
+```{r}
+#| context: server
+output$distPlot <- renderPlot({
+   x <- faithful[, 2]  # Old Faithful Geyser data
+   bins <- seq(min(x), max(x), length.out = input$bins + 1)
+   hist(x, breaks = bins, col = 'darkgray', border = 'white',
+        xlab = 'Waiting time to next eruption (in mins)',
+        main = 'Histogram of waiting times')
+})
+```

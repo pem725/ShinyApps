@@ -80,10 +80,10 @@ ui <- page_sidebar(
     selectInput("modsAvail","Select Stat Model", modsAvail),
     conditionalPanel(
       condition = "input.modsAvail == 'Demonstration'",
-      sliderInput("Ndemo","Sample Size", min=1, max=1000, value=150, step=50, animate=T),
-      sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5, step=1, animate=T),
+      sliderInput("Ndemo","Sample Size", min=0, max=1000, value=150, step=50, animate=T),
+      sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5, step=.25, animate=T),
       sliderInput("SDdemo", "SD", min = 0, max = 15, value=5, step=.25, animate=T),
-      sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .7, step = .01, animate = T)
+      sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8, step = .01, animate = T)
     ),
     conditionalPanel(
       condition = "input.modsAvail == 't-test'",
@@ -158,7 +158,7 @@ server <- function(input, output) {
          geom_density(fill = "#56B4E9", alpha=.2) +
          geom_vline(aes(xintercept = 0), color = "blue", linetype = "dashed", size = 1) +
          geom_vline(aes(xintercept = mean(x)), color = "red", size = 1) +
-         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))), xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))), ymin=0, ymax = Inf), alpha = .2, fill = "red")
+         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))), xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))), ymin=0, ymax = Inf), alpha = .01, fill = "pink")
   })
   
   output$powerpe <- renderText({ # power point estimate
