@@ -1,11 +1,32 @@
 ---
+title-block-banner: true
 title: "Simulating data to estimate power:  Level up from G*Power"
-author: "Patrick E. McKnight & MRES"
+date: last-modified
+date-format: long
+author: 
+  - name: Patrick E. McKnight
+    id: pem
+    orcid: 
+    email: pmcknigh@gmu.edu
+    affiliation: 
+      - name: George Mason University
+        city: Fairfax,
+        state: VA
+        url: www.mres-gmu.org
+abstract:  |
+  Power - the probably of success in the frequentist world - gets attention mostly out of necessity. Many see power analyses as a hurdle to get funding while others treat it as privileged domain for the technically capable. Neither reality need be true in this brave new world. We plan to shed a different light on the topic by demonstrating power analysis by simulation. No, we are not using large language models to estimate power but we are using the power of randomization to generate data and, in turn, power estimates. You will learn that you too can do the very same with little to no technical knowledge. Come, learn, and later teach us after you perfect the techniques.
+keywords:
+  - Statistical Power
+  - Simulation
+  - R/shiny
+license: "CC BY"
+copyright:
+  holder: Patrick E. McKnight
+  year: 2023
 format: html
 server: shiny
 ---
-
-Power - the probably of success in the frequentist world - gets attention mostly out of necessity. Many see power analyses as a hurdle to get funding while others treat it as privileged domain for the technically capable. Neither reality need be true in this brave new world. We plan to shed a different light on the topic by demonstrating power analysis by simulation. No, we are not using large language models to estimate power but we are using the power of randomization to generate data and, in turn, power estimates. You will learn that you too can do the very same with little to no technical knowledge. Come, learn, and later teach us after you perfect the techniques.
+Estimating power can be challenging for most of us. Even the seasoned academic finds computing statistical power beyond reach. The concepts are simple enough but the complexities of either the software or the models leaves many to offload the work to more expert data analysts. Those analysts often rely on the same complex software to estimate complex models in the least intuitive manner. Here, we reintroduce the simple concepts of statistical power and then offer an alternative set of procedures that we hope leads more to assume control of their own data analyses.
 
 Before we talk about power, we need to address null hypothesis significance testing (NHST). Why? Well, power is the probabiliity of success in the NHST world and really only in that world. If you don't understand that world then how can you understand power? You can't. So, let's dive into this world first.
 
@@ -40,20 +61,82 @@ $$
 What does that mean?
 
 $$
-P(): \mbox{Probablity computed}
+P(): \mbox{Probablity (range 0 - 1)}
 $$
 
 $$
-Result:  \mbox{Statistic computed}
+Result:  \mbox{Statistic computed (mean difference)}
 $$
 
 $$
-H_0: \mbox{Null Hypothesis}
+H_0: \mbox{Null Hypothesis } (Dogs = cats)
 $$
+Given the null (i.e., the hypothesis we usually are NOT interested in testing), we must assess whether our results match it.  Often they do not.  But what are these results?  We use results that are computed from the data.  For example, we might be interested in the mean difference between reported happiness for dog and cat lovers.  Often, students find this part to be the hardest and, admittedly, it can be quite challenging.  We must "operationalize" the mean difference into scale that reflects the difference but also has a known shape.
+
+
 
 ```{r}
+#| label: setup
+#| include: false
+library('paramtest')
+library('pwr')
+library('ggplot2')
+library('knitr')
+library('nlme')
+library('lavaan')
+library('dplyr')
+library(bslib) # the prime driver here for UI
+```
+
+
+## Univariate Playground
+
+```{r}
+#| label: ui
+#| panel: sidebar
+sliderInput("Ndemo","Sample Size", min=0, max=1000, value=150)
+sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5)
+sliderInput("SDdemo", "SD", min = 0, max = 15, value=5)
+sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8)
+```
+
+
+```{r}
+plotOutput("p1")
+```
+
+
+```{r}
+#| context: server
+  genDat <- reactive({
+      data.frame(obs=1:input$Ndemo, 
+                 x=rnorm(input$Ndemo, 
+                         input$MUdemo, 
+                         sqrt((input$SDdemo^2)/input$Rel)))
+  })
+  
+  output$p1 <- renderPlot({
+      # draw the histogram with the specified number of bins
+      ggplot(genDat(),aes(x=x)) + 
+         geom_histogram(aes(y = ..density..)) +
+         geom_density(fill = "#56B4E9", 
+                      alpha=.2) +
+         geom_vline(aes(xintercept = 0), 
+                    color = "blue", 
+                    linetype = "dashed", 
+                    size = 1) +
+         geom_vline(aes(xintercept = mean(x)), 
+                    color = "red", 
+                    size = 1) +
+         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
+                       xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
+                       ymin=0, ymax = Inf), 
+                   alpha = .01, fill = "pink")
+  })
 
 ```
+
+
 
 ## Shiny Documents
 
