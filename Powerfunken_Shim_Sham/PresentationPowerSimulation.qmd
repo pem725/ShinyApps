@@ -1,18 +1,19 @@
 ---
 title-block-banner: true
-title: "Simulating data to estimate power:  Level up from G*Power"
+title: "Simulating data to estimate power"
+subtitle: "Level up from G*Power"
 date: last-modified
 date-format: long
 author: 
   - name: Patrick E. McKnight
     id: pem
-    orcid: 
+    orcid: 0000-0002-9067-9066
     email: pmcknigh@gmu.edu
     affiliation: 
       - name: George Mason University
-        city: Fairfax,
-        state: VA
-        url: www.mres-gmu.org
+        department:  Department of Psychology
+        address: Fairfax, VA
+        url: https://www.mres-gmu.org
 abstract:  |
   Power - the probably of success in the frequentist world - gets attention mostly out of necessity. Many see power analyses as a hurdle to get funding while others treat it as privileged domain for the technically capable. Neither reality need be true in this brave new world. We plan to shed a different light on the topic by demonstrating power analysis by simulation. No, we are not using large language models to estimate power but we are using the power of randomization to generate data and, in turn, power estimates. You will learn that you too can do the very same with little to no technical knowledge. Come, learn, and later teach us after you perfect the techniques.
 keywords:
@@ -23,14 +24,43 @@ license: "CC BY"
 copyright:
   holder: Patrick E. McKnight
   year: 2023
-format: html
+format: 
+  html:
+    code-fold: show
+    code-summary: "Show the Code"
+execute:
+  echo: true
 server: shiny
+highlight:  true
+code-fold: false
+theme: cyborg
+
 ---
 Estimating power can be challenging for most of us. Even the seasoned academic finds computing statistical power beyond reach. The concepts are simple enough but the complexities of either the software or the models leaves many to offload the work to more expert data analysts. Those analysts often rely on the same complex software to estimate complex models in the least intuitive manner. Here, we reintroduce the simple concepts of statistical power and then offer an alternative set of procedures that we hope leads more to assume control of their own data analyses.
 
+After today, you will be able to answser (correctly) the following questions:
+
+1. What is statistical power?
+2. Why are point estimates of statistical power of limited use?
+3. How do I setup a simulation of effects?
+4. Where can I go for more help?
+
+If you think you can answer each without much hesitation, sit back and enjoy the show; otherwise, sit up, grab your own computer, load this file, and get ready to learn!
+
+---
+
+**REFRESHER**
+
+> For those who might need a wee bit of a refresher on hypothesis testing, I recommend you visit [our good ol' friend Sal Kahn](https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample).  He does a lovely job explaining the rudiments of null hypothesis significance testing (NHST) - certainly sufficient enough for this presentation.
+
+---
+
+
+# Power Primer
+
 Before we talk about power, we need to address null hypothesis significance testing (NHST). Why? Well, power is the probabiliity of success in the NHST world and really only in that world. If you don't understand that world then how can you understand power? You can't. So, let's dive into this world first.
 
-# NHST
+## NHST
 
 The world of social science statistics largely revolves around the same ideas. We have a theory (Dogs are superior to cats).
 
@@ -71,43 +101,68 @@ $$
 $$
 H_0: \mbox{Null Hypothesis } (Dogs = cats)
 $$
-Given the null (i.e., the hypothesis we usually are NOT interested in testing), we must assess whether our results match it.  Often they do not.  But what are these results?  We use results that are computed from the data.  For example, we might be interested in the mean difference between reported happiness for dog and cat lovers.  Often, students find this part to be the hardest and, admittedly, it can be quite challenging.  We must "operationalize" the mean difference into scale that reflects the difference but also has a known shape.
+Given the null (i.e., the hypothesis we usually are NOT interested in testing), what is the probability of getting these results?  We hope to have estimates that are very low.  Why?  We want results that are inconsistent with what we never hypothesized - the null.  Frequently, we fail to get the desired results; thus, we fail to reject the null.  More often than not, we could have and should have known that our desires were never going to be met.  How?
+
+## Statistical Power
+
+But what are these results that I refer to above?  The results come from data computations that convey either a difference between means (e.g., t-test, F-test, etc.) or an association (e.g., r, beta/b, etc.).  For example, we might be interested in the mean difference between reported happiness for dog and cat lovers.  Often, students find this part to be the hardest and, admittedly, it can be quite challenging.  We must "operationalize" the mean difference into a scale that reflects the difference but also has a known shape.  Why?  Well, the difference is the part that we wish to test but we need to have a difference that can be communicated by a known shape because that shape allows us to estimate probabilities without much effort.  In short, the shape makes the math easier.  
+
+
+## Basic Sampling
+
+What scale offers us both differences and shapes?  The standardized normal is our mostly widely used option along with the t, F, and chi-square distributions.  Psychological scientists mostly use a t or F distribution. These are the standard statistical distributions in our commonly-used inferential procedures (e.g., ANOVA, regression, etc.).  We use these statistics in our examples below.  Most of you may recall, the standard normal distribution allows z-scores to be compared to either zero (i.e., an implied, one-sample comparison) or another mean. Let's look at the raw means and how that may relate to the t-test statistic:
+
 
 
 
 ```{r}
 #| label: setup
-#| include: false
+#| include: true
+#| echo: true
+#| error: false
+#| warning: false
+#| message: false
+#| collapse: false
 library('paramtest')
 library('pwr')
 library('ggplot2')
+library('ggthemes')
+library('xkcd')
 library('knitr')
 library('nlme')
 library('lavaan')
 library('dplyr')
-library(bslib) # the prime driver here for UI
+library('bslib') # the prime driver here for UI
 ```
 
+### Univariate Playground
 
-## Univariate Playground
 
 ```{r}
 #| label: ui
 #| panel: sidebar
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
 sliderInput("Ndemo","Sample Size", min=0, max=1000, value=150)
 sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5)
 sliderInput("SDdemo", "SD", min = 0, max = 15, value=5)
 sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8)
+
 ```
 
 
 ```{r}
+#| panel: fill
+#| echo: false
 plotOutput("p1")
 ```
 
 
 ```{r}
 #| context: server
+#| echo: true
   genDat <- reactive({
       data.frame(obs=1:input$Ndemo, 
                  x=rnorm(input$Ndemo, 
@@ -118,7 +173,7 @@ plotOutput("p1")
   output$p1 <- renderPlot({
       # draw the histogram with the specified number of bins
       ggplot(genDat(),aes(x=x)) + 
-         geom_histogram(aes(y = ..density..)) +
+         geom_histogram(aes(y = after_stat(density))) +
          geom_density(fill = "#56B4E9", 
                       alpha=.2) +
          geom_vline(aes(xintercept = 0), 
@@ -131,34 +186,11 @@ plotOutput("p1")
          geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
                        xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
                        ymin=0, ymax = Inf), 
-                   alpha = .01, fill = "pink")
+                   alpha = .01, fill = "pink") + 
+      theme_xkcd()
   })
-
 ```
 
 
 
-## Shiny Documents
 
-This Quarto document is made interactive using Shiny. Interactive documents allow readers to modify parameters and see the results immediately. Learn more about Shiny interactive documents at <https://quarto.org/docs/interactive/shiny/>.
-
-## Inputs and Outputs
-
-You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change. This demonstrates how a standard R plot can be made interactive:
-
-```{r}
-sliderInput("bins", "Number of bins:", 
-            min = 1, max = 50, value = 30)
-plotOutput("distPlot")
-```
-
-```{r}
-#| context: server
-output$distPlot <- renderPlot({
-   x <- faithful[, 2]  # Old Faithful Geyser data
-   bins <- seq(min(x), max(x), length.out = input$bins + 1)
-   hist(x, breaks = bins, col = 'darkgray', border = 'white',
-        xlab = 'Waiting time to next eruption (in mins)',
-        main = 'Histogram of waiting times')
-})
-```
