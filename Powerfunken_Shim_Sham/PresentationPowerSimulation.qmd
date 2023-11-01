@@ -85,10 +85,10 @@ $$
 Now, why would we do this? Good question that is beyond the reach of this presentation. Since we do it, let's learn it. The null hypothesis is:
 
 $$
-P(Result | H_0)
+\mbox{p-value} \equiv P(Result | H_0)
 $$
 
-What does that mean?
+What does that $\mbox{math speak}$ mean?
 
 $$
 P(): \mbox{Probablity (range 0 - 1)}
@@ -101,17 +101,33 @@ $$
 $$
 H_0: \mbox{Null Hypothesis } (Dogs = cats)
 $$
-Given the null (i.e., the hypothesis we usually are NOT interested in testing), what is the probability of getting these results?  We hope to have estimates that are very low.  Why?  We want results that are inconsistent with what we never hypothesized - the null.  Frequently, we fail to get the desired results; thus, we fail to reject the null.  More often than not, we could have and should have known that our desires were never going to be met.  How?
+Given the null (i.e., the hypothesis we usually are NOT interested in testing), what is the probability of getting these results?  The reason we wish to know this probability is to rule out the null hypothesis.  Many interpret this as "ruling out chance" but we do nothing of the sort.  What we test is the inconsistency of our empirical results from the expected results from the null.  When the inconsistency is large enough, we say that it differs "significantly" from the null and, as a result, we rule out the null.  The truth of the matter is that we can never fully rule out the null nor can we accept the null.  The evidence just needs to be inconsistent enough to cross the threshold of 95%.  In short, we need to expect those results to occur only 5% of the time given the null - a level of comfort known only to the farmers in rural England (c. 1920s).  We scientists may have differing empirical comforts but those standards remain.  Social science continue to use 95% confidence limits on most, if not all NHST models and effects.  
+
+But what are these results that I refer to above?  The results come from data computations that convey either a difference between means (e.g., t-test, F-test, etc.) or an association (e.g., r, beta/b, etc.).  For example, we might be interested in the mean difference between reported happiness for dog and cat lovers.  Often, students find this part to be the hardest and, admittedly, it can be quite challenging.  We must "operationalize" the mean difference into a scale that reflects the difference but also has a known shape.  Why?  Well, the difference is the part that we wish to test but we need to have a difference that can be communicated by a known shape because that shape allows us to estimate probabilities without much effort.  In short, the shape makes the math easier.  
+
+We hope to have estimates that are very low.  Why?  We want results that are inconsistent with what we never hypothesized - the null.  Frequently, we fail to get the desired results; thus, we fail to reject the null.  More often than not, we could have and should have known that our desires were never going to be met.  How?
 
 ## Statistical Power
 
-But what are these results that I refer to above?  The results come from data computations that convey either a difference between means (e.g., t-test, F-test, etc.) or an association (e.g., r, beta/b, etc.).  For example, we might be interested in the mean difference between reported happiness for dog and cat lovers.  Often, students find this part to be the hardest and, admittedly, it can be quite challenging.  We must "operationalize" the mean difference into a scale that reflects the difference but also has a known shape.  Why?  Well, the difference is the part that we wish to test but we need to have a difference that can be communicated by a known shape because that shape allows us to estimate probabilities without much effort.  In short, the shape makes the math easier.  
+
 
 
 ## Basic Sampling
 
-What scale offers us both differences and shapes?  The standardized normal is our mostly widely used option along with the t, F, and chi-square distributions.  Psychological scientists mostly use a t or F distribution. These are the standard statistical distributions in our commonly-used inferential procedures (e.g., ANOVA, regression, etc.).  We use these statistics in our examples below.  Most of you may recall, the standard normal distribution allows z-scores to be compared to either zero (i.e., an implied, one-sample comparison) or another mean. Let's look at the raw means and how that may relate to the t-test statistic:
+The standardized normal scale is our mostly widely used option along with the t, F, and chi-square distributions.  Psychological scientists mostly use a t or F distribution, and, for the purposes of this presentation, we restrict our discussion to only those distributions.  As you will soon learn, it doesn't matter what scale we use to quantify the results.  As long as we have a critical value to assess what might be "inconsistent with the null."  The t and F distributions are the standard statistical distributions in our commonly-used inferential procedures (e.g., ANOVA, regression, etc.).  
 
+Most of you may recall, the standard normal distribution allows z-scores to be compared to either zero (i.e., an implied, one-sample comparison) or another mean. The z-test was popular prior to William Gossett.  
+
+---
+
+**REFRESHER**
+
+> For those readers less familiar about the role Gosset played in the development of the t-statistic, I suggest you [watch this brief video](https://youtu.be/32CuxWdOlow?si=_hFY_TP72CGHSW9E) that provides a nice overview.
+
+---
+
+
+Let's look at the raw means and how that may relate to the t-test statistic:
 
 
 
@@ -139,7 +155,7 @@ library('bslib') # the prime driver here for UI
 
 
 ```{r}
-#| label: ui
+#| label: ui1
 #| panel: sidebar
 #| fill: true
 #| echo: false
@@ -191,6 +207,84 @@ plotOutput("p1")
   })
 ```
 
+## Multi-Mean Playground
 
+
+```{r}
+#| label: ui2
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+#| layout-ncol: 2
+#| layout-nrow: 4
+sliderInput("N1","Sample Size (Group 1)", min=0, max=1000, value=150)
+sliderInput("N2","Sample Size (Group 2)", min=0, max=1000, value=150)
+
+sliderInput("MU1", "Mean (Group 1)", min = 0, max = 15, value=5)
+sliderInput("MU2", "Mean (Group 2)", min = 0, max = 15, value=5)
+
+sliderInput("SD1", "SD (Group 1)", min = 0, max = 15, value=5)
+sliderInput("SD2", "SD (Group 2)", min = 0, max = 15, value=5)
+
+sliderInput("Rel1","Meas Reliability (Group 1)", min=0, max=1, value = .8)
+sliderInput("Rel2","Meas Reliability (Group 2)", min=0, max=1, value = .8)
+```
+
+
+```{r}
+#| label: ui3
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+#| layout-ncol: 1
+#| layout-nrow: 4
+
+
+```
+
+
+```{r}
+#| panel: fill
+#| echo: false
+plotOutput("p2")
+```
+
+
+```{r}
+#| context: server
+#| echo: true
+  genDat2 <- reactive({
+      data.frame(grp=as.factor(c(rep(1,input$N1),rep(2,input$N2))), 
+                 x=c(rnorm(input$N1, 
+                         input$MU1, 
+                         sqrt((input$SD1^2)/input$Rel1)),
+                     rnorm(input$N2, 
+                         input$MU2, 
+                         sqrt((input$SD2^2)/input$Rel2))
+                     ))
+  })
+  
+  output$p2 <- renderPlot({
+      # draw the histogram with the specified number of bins
+      ggplot(genDat2(),aes(x=x, group = grp, fill=grp)) + 
+         geom_histogram(aes(y = after_stat(density))) +
+         geom_density(fill = "#56B4E9", 
+                      alpha=.2) +
+         geom_vline(aes(xintercept = 0), 
+                    color = "blue", 
+                    linetype = "dashed", 
+                    size = 1) +
+         geom_vline(aes(xintercept = mean(x)), 
+                    color = "red", 
+                    size = 1) +
+         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
+                       xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
+                       ymin=0, ymax = Inf), 
+                   alpha = .01, fill = "pink") + 
+      theme_xkcd()
+  })
+```
 
 
