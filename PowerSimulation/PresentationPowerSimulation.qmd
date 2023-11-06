@@ -1,0 +1,453 @@
+---
+title-block-banner: true
+title: "Simulating data to estimate power"
+subtitle: "Level up from G*Power"
+date: last-modified
+date-format: long
+author: 
+  - name: Patrick E. McKnight
+    id: pem
+    orcid: 0000-0002-9067-9066
+    email: pmcknigh@gmu.edu
+    affiliation: 
+      - name: George Mason University
+        department:  Department of Psychology
+        address: Fairfax, VA
+        url: https://www.mres-gmu.org
+abstract:  |
+  Power - the probably of success in the frequentist world - gets attention mostly out of necessity. Many see power analyses as a hurdle to get funding while others treat it as privileged domain for the technically capable. Neither reality need be true in this brave new world. We plan to shed a different light on the topic by demonstrating power analysis by simulation. No, we are not using large language models to estimate power but we are using the power of randomization to generate data and, in turn, power estimates. You will learn that you too can do the very same with little to no technical knowledge. Come, learn, and later teach us after you perfect the techniques.
+keywords:
+  - Statistical Power
+  - Simulation
+  - R/shiny
+license: "CC BY"
+copyright:
+  holder: Patrick E. McKnight
+  year: 2023
+format: 
+  html:
+    code-fold: show
+    code-summary: "Show the Code"
+execute:
+  echo: true
+server: shiny
+highlight:  true
+code-fold: false
+theme: cyborg
+toc: true
+---
+
+Estimating power can be challenging for most of us. Even the seasoned academic finds computing statistical power beyond reach. The concepts are simple enough but the complexities of either the software or the models leaves many to offload the work to more expert data analysts. Those analysts often rely on the same complex software to estimate complex models in the least intuitive manner. Here, we reintroduce the simple concepts of statistical power and then offer an alternative set of procedures that we hope leads more to assume control of their own data analyses.
+
+After today, you will be able to answser (correctly) the following questions:
+
+1.  [What is statistical power?]
+2.  [Why are point estimates of statistical power of limited use?]
+3.  [How do I setup a simulation of effects?]
+4.  [Where can I go for more help?]
+
+If you think you can answer each without much hesitation, sit back and enjoy the show; otherwise, sit up, grab your own computer, load this file, and get ready to learn!
+
+------------------------------------------------------------------------
+
+**REFRESHER**
+
+> For those who might need a wee bit of a refresher on hypothesis testing, I recommend you visit [our good ol' friend Sal Kahn](https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample){target="_blank"}. He does a lovely job explaining the rudiments of null hypothesis significance testing (NHST) - certainly sufficient enough for this presentation. (38 mins of video and 3 practice sessions - FREE ...as in beer)
+
+------------------------------------------------------------------------
+
+# Housekeeping
+Setup the R environment for the remainder of the talk.
+```{r}
+#| label: setup
+#| include: true
+#| echo: true
+#| error: false
+#| warning: false
+#| message: false
+#| collapse: false
+library('paramtest')
+library('pwr')
+library('ggplot2')
+library('ggthemes')
+library('xkcd')
+library('knitr')
+library('nlme')
+library('lavaan')
+library('dplyr')
+library('bslib') # the prime driver here for UI
+```
+
+
+
+# What is Statistical Power?
+
+Before we talk about power, we need to address null hypothesis significance testing (NHST). Why? Well, power is the probability of success in the NHST world and, really, only in that world. If you don't understand that world then how can you understand power? You can't. So, let's dive into this NHST world first and then come back to power.
+
+## NHST
+
+The world of social science statistics largely revolves around the same inferential approach. We have a theory (Dogs are superior to cats).
+
+$$
+Dog >> cat
+$$
+
+That theory gets translated into an operation (Dog people are smarter than cat people).
+
+$$
+H: \bar{X}_{IQ|Dog} > \bar{X}_{IQ|cat}
+$$
+
+That operation is what we hope to discover as the difference necessary to support our hypothesis that dogs are superior to cats. It wouldn't matter what measure you collected, dogs would always outperform cats.
+
+BUT we don't test that difference directly. Instead, we test the null. What is the null you ask? The null is really the nil or, quite simply that there is no difference (Dog people are equal to cat people).
+
+$$
+H_0: \bar{X}_{Dog} = \bar{X}_{cat}
+$$
+
+Now, why would we go to great lengths to make our tested difference ($Dogs = cats$) to be different from our expected difference ($Dogs \gt cats$)? A good question [beyond the reach of this presentation](https://allendowney.blogspot.com/2016/05/learning-to-love-bayesian-statistics.html){target="_blank"}. Since we go through these machinations, let's learn to live there for a moment so we can understand the nature of power in NHST.  Also, at this point, I need to weigh in on my Bayesian class this spring (PSYC 757; register NOW). Given that we need to use this null with the common statistics, we ought to know where it fits into the whole hypothesis testing world. Here is where the beloved (or reviled) $p-value$ comes into our story. The null hypothesis fits with the $p-value$ here:
+
+$$
+\mbox{p-value} \equiv P(Result | H_0)
+$$
+or, for our running example with a fabricated difference between Dog and cat people:
+
+$$
+\mbox{p-value} = P(t = 2.23 | H_0)
+$$
+
+and where...
+
+$$
+t = \frac{\bar{X}_1 - \bar{X}_2}{SE} =\frac{\bar{X}_{IQ|Dog} - \bar{X}_{IQ|cat}}{\sqrt{\frac{s_{ID|Dog}^2}{n_{Dog}} + \frac{s_{ID|cat}^2}{n_{cat}}}} = 2.23
+$$
+Remember, I made up this result.
+
+What does that $\mbox{math speak}$ mean?
+
+$$
+P(): \mbox{Probablity (range 0 - 1)}
+$$
+
+$$
+Result:  \mbox{Statistic computed (mean difference)}
+$$
+In the example above, we used the t-statistic to get an estimate of the result.
+
+$$
+H_0: \mbox{Null Hypothesis } (Dogs = cats)
+$$
+
+Given the null (i.e., the hypothesis we usually are NOT interested in testing), what is the probability of getting these results? The reason we wish to know this probability is to rule out the null hypothesis. Many interpret this as "ruling out chance" but we do nothing of the sort. What we test is the inconsistency of our empirical results from the expected results of the null or no differences. When the inconsistency is large enough, we say that it differs "significantly" from the null and, as a result, we rule out the null. The truth of the matter is that we can never fully rule out the null nor can we accept the null. The evidence just needs to be inconsistent enough to cross the a pre-defined threshold ($p_{crit} = .05$ or $95\%$ confidence). In short, we need to expect those results to occur only 5% of the time given the null - a level of comfort known only to the farmers in rural England (c. 1920s). We scientists may have differing empirical comforts but those standards remain. Social scientists continue to use 95% confidence limits on most, if not all NHST models and effects.
+
+But what are these results that I refer to above? The results come from data computations that convey either a difference between means (e.g., t-test, F-test, etc.) or an association (e.g., r, beta/b, etc.). For example, we might be interested in the mean difference between reported happiness for dog and cat lovers. Often, students find this part to be the hardest and, admittedly, it can be quite challenging. We must "operationalize" the mean difference into a scale that reflects the difference but also has a known shape. Why? Well, the difference is the part that we wish to test but we need to have a difference that can be communicated by a known shape because that shape allows us to estimate probabilities without much effort. In short, the shape makes the math easier.
+
+We hope to have low probability estimates of our data to be consistent with the null. Why? We want results that are inconsistent with what we never hypothesized - the null. Frequently, we fail to get the desired result; thus, we fail to reject the null. Many areas within social science require statistical significance for publication. That requirement appears to be softening now but the road to scientific success in the frequentist world is paved with significant effects (i.e., ruling out the null). Failure to reject the null means more work and, more than likely, more failure. Those failures, however, are often quite predictable. They are predictable because most studies lack the statistical power.  Yes, your failures to reject the null are almost entirely due to low statistical power. Wouldn't it be nice to have a forecast for your success? I think so. How might we make such forecasts? By estimation.
+
+## Power
+
+The best way to guess your chances of success...er, rejecting the null, is to **estimate** statistical power. Estimating statistical power can be quite challenging - even for the seasoned data analyst. Most of us rely on standard methods to get point estimates or single values (presumably to be reported elsewhere). These point estimates come from stand-alone packages (e.g., [G\*Power](https://www.psychologie.hhu.de/arbeitsgruppen/allgemeine-psychologie-und-arbeitspsychologie/gpower){target="_blank"}, [piface Java app](https://homepage.stat.uiowa.edu/~rlenth/Power/){target="_blank"}), web pages (e.g., [WebPower](https://webpower.psychstat.org/wiki/){target="_blank"}, [PowerUpR](https://powerupr.shinyapps.io/index/){target="_blank"}, [powerandsamplesize.com](https://powerandsamplesize.com/){target="_blank"}), or packages for statistical ([R](https://cran.r-project.org/web/packages/pwrss/vignettes/examples.html){target="_blank"}, [SPSS](https://www.ibm.com/docs/en/spss-statistics/27.0.0?topic=features-power-analysis#d333391e103){target="_blank"}) or general programming ([python (pypi)](https://pypi.org/project/power-analysis/){target="_blank"}, [numpy](https://statsthinking21.github.io/statsthinking21-python/09-StatisticalPower.html){target="_blank"}) languages. Regardless of the tool, the methods almost always rely on assumptions such as standard distributions, balanced designs, and perfect measurement (reliability $=$ 1.0). These assumptions almost always work in our favor. We will arrive at values that are so otherworldly that nobody could honestly defend them. But, we do defend them. Not sure why but with the help of a little simulation, you will have other options. The bottom line, these assumptions may not help us estimate power well. To address this point, we need to know a bit about how power is actually calculated.
+
+## Bias in Estimation
+
+You are not the only beneficiary of studies with sufficient statistical power.  Funding agencies, internal review boards (IRBs), journal editors/reviewers, and other groups responsible for the support of science demand that we justify our methods, measures, samples, and such.  Most of that justification stems from years of failed research attempts to replicate, extend, or discover much due to small samples with poor measurement.  Thus, there are many parties interested in the maximization of statistical power.  Our collective resources get used more efficiently.  If statistical power (at least *a priori* power estimates) levels are mandated prior to funding or publication, many of us will find ways to see large effects when none are present.  We have what is termed a self-serving bias.  No need to be defensive about that reflexive stance, we can learn to be more open to challenges to our hunches and estimates.  Throughout the rest of the presentation, you will learn how to combat those biases and get better estimates of effect.  Further, you may soon realize that statistical power is not just matter of getting more subjects.  We need to explore the concept of power and the computations of said estimates before we can combat our inherent biases.
+
+## The Big Power Picture
+
+Power is actually quite simple and most people grasp the idea behind the term. In the rawest form, power is an **estimate** of a probability based upon **MANY** assumptions about the future.  Proportionally, power directly relates to sample size and effect size.  Larger samples result in greater power to detect an effect.  Larger effects are easier to detect.  Thus, the entirety of statistical power can be summed up by sample size and effect size.  There are more finer details to understand as we unpack the world of statistical power.  
+
+### Sample Size  
+
+We know the role of sample size to be self-evident from the [**LAW OF LARGE NUMBERS**](https://psu-eberly.shinyapps.io/Law_of_Large_Numbers/){target="_blank"} and hold that precision of estimate (reliability) is an essential ingredient to understanding both stability, and, in a not-so-subtle manner, validity of effect.  Stability comes from precision.  The greater the sample size, the more likely we are to get replicable estimates of the group (i.e., mean).  Validity comes from the assumption in the law of large numbers and from inferential statistics (i.e., NHST) regarding the population parameter (i.e., reality).  Larger samples help us gain precision of estimate for the population parameter.  Thus, our inferences are such that larger samples give us more valid, population estimates.  We shall return to this point later.  For now, let us focus on the sample size as it pertains to reliability.
+
+### Effect Size
+
+The second element to understanding statistical power is the effect size.  My graduate advisor (Lee Sechrest) wrote a [great piece](https://deepblue.lib.umich.edu/bitstream/handle/2027.42/67520/10.1177_0193841X8200600501.pdf?sequence=2){target="_blank"} on the variety of estimates that could be used to quantify effect sizes.  Furthermore, he and his colleague Bill Yeaton (1981) [argued that such measures of effect were almost entirely meaningless](https://www.researchgate.net/profile/Lee-Sechrest/publication/232502571_Meaningful_measures_of_effect/links/53e9906c0cf2fb1b9b6715f9/Meaningful-measures-of-effect.pdf){target="_blank"} unless calibrated to some known standards (e.g., money, lives, etc.). Today, these measures of effect are mere guesses of terribly uncertain outcomes.  We guess numbers without knowing much about how they may represent our future.  The numerical guesses are almost always self-serving in that they allow us to have smaller samples (see above) as a trade-off for larger effects.  We argue that the large expected effect is justifiable because some relevant literature or recent efforts provide a hint of a "large effect."  What we then do is assign a numerical value to that effect size to match the large effect.  Here is the effect we are computing in most cases for power analysis:
+
+$$
+d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
+$$ 
+The effects expressed in Cohen's d units are centered at zero (i.e., the mean effect equals zero or no effect at the center of the distribution) with each unit from the center equal to one standard deviation.  In short, a z-score.  Cohen's d is a standardized measure of effect that is centered at zero but unbounded in both directions (positive or negative effects; thus, $-\infty < d < \infty$).   Articles citing Gene Glass and Jacob Cohen [(e.g., Sullivan & Feinn, 2012; see Tables 1 and 2) ](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3444174/#:~:text=Cohen's%20term%20d%20is%20an,large%20(d%20%E2%89%A5%200.8).&text=According%20to%20Cohen%2C%20%E2%80%9Ca%20medium,eye%20of%20a%20careful%20observer.){target="_blank"} continued to stoke the flames of heuristics when assigning effect size estimates.  They said:
+
+> The denominator standardizes the difference by transforming the absolute difference into standard deviation units. Cohen's term d is an example of this type of effect size index. Cohen classified effect sizes as small ($d = 0.2$), medium ($d = 0.5$), and large ($d \geq 0.8$). According to Cohen, "a medium effect of .5 is visible to the naked eye of a careful observer. A small effect of .2 is noticeably smaller than medium but not so small as to be trivial. A large effect of .8 is the same distance above the medium as small is below it." These designations large, medium, and small do not take into account other variables such as the accuracy of the assessment instrument and the diversity of the study population. However these ballpark categories provide a general guide that should also be informed by context.
+
+The unfortunate effect of such heuristics is that most social scientists ignored the last part where they acknowledged the omission of so many relevant variables when assigning these values.  Thus, failure to account for them leads most of us to find values in our favor and rely on the heuristics to justify them.  
+
+# ZZZZ NEED transition here
+
+## Calculating Power
+
+One of the easiest ways to get into the methods of computation is to dig into the "guts" of the computer programs. Thankfully, R is an open-source programming language that ensures all contributions are both open and available to us - the users. So, I will take apart the easiest model - the t-test (pwr.t.test in library(pwr)) and expand upon other online explanations. In particular, I would highly recommend [dariober's](https://stats.stackexchange.com/a/496316){target="_blank"} excellent explanatory examples and code.
+
+### Power Calculation Code Inspection (t-test)
+
+The essence of the code to compute statistical power for a two-tailed, two-sided alternative hypothesis is as follows (extracted from the pwr::pwr.t.test() function and simplified for the purposes of this presentation):
+
+```{r}
+#| echo: true
+#| label: RcodePower
+#| eval: false
+    n <- 100 # sample size
+    ng <- 2 # number of groups
+    d <- .3 # effect size
+    sl <- .05 # significance level
+    nu <- (n - 1) * ng
+    qu <- qt(sl/2, nu, lower = FALSE)
+    ncp <- sqrt(n/ng) * d
+    df <- (n/ng) - 1
+    qu <- qt(sl/2, df, lower = FALSE)
+    
+    ExpPower <- pt(qu, nu, ncp, lower = FALSE) + 
+      pt(-qu, nu, ncp, lower = TRUE)
+```
+
+
+
+
+```{r}
+#| label: uiPower1
+#| panel: sidebar
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+sliderInput("n","Total Sample Size", min=0, max=500, step= 5, value=150)
+sliderInput("d", "Effect Size", min = 0, max = 2, step= .01, value=.25)
+sliderInput("ng", "Number of Groups", min = 1, max = 4, step=1,value=2)
+sliderInput("sl", "Significance Level", min = .001, max = .1, step=.001, value=.05)
+
+```
+
+```{r}
+#| panel: fill
+#| echo: false
+plotOutput("pP1")
+```
+
+```{r}
+#| context: server
+#| echo: true
+
+  output$pP1 <- renderPlot({
+    nu <- (input$n - 1) * input$ng
+    qu <- qt(input$sl/2, nu, lower = FALSE)
+    ncp <- sqrt(input$n/input$ng) * input$d
+
+    
+
+    df <- (input$n/input$ng) - 1
+    qu <- qt(input$sl/2, df, lower = FALSE)
+    # Code for plot
+    right <- pt(qu, df, ncp = ncp, lower = FALSE)
+    left <- pt(-qu, df, ncp = ncp, lower = TRUE)
+    #right + left
+    # [1] 0.42 # As per pwr.t.test()
+
+
+    # Code for plot
+    x <- seq(-12, 5, length.out= 200)
+    y <- dt(x, df= df, ncp= ncp)
+    plot(x, y, type= 'b', lwd= 1.5, xlab= 'Value of T', ylab= 'Density', main = paste("Power = ", round(right+left,2), "; ncp = ", round(ncp,2), "; df = ", df, sep=""))
+    polygon(c(x[x > qu], qu), c(y[x > qu], 0), col= "grey", border= 'black')
+    polygon(c(x[x < -qu], -qu), c(y[x < -qu], 0), col= "grey", border= 'black')
+    abline(v= c(-qu, qu), lty= 'dashed', col= 'blue')
+    abline(v=ncp,col='red')
+    
+    #x <- seq(-6, 6, length.out= 100)
+    #y <- dt(x, df= df)
+    #plot(x, y, type= 'l', lwd= 1.5, xlab= 'Value of T', ylab= 'Density')
+    #polygon(c(x[x > qu], qu), c(y[x > qu], 0), col= "grey", border= 'black')
+    #polygon(c(x[x < -qu], -qu), c(y[x < -qu], 0), col= "grey", border= 'black')
+
+  })
+```
+```{r}
+
+```
+
+
+
+
+
+### What's the effect?
+
+An effect is often expressed in the form of a non-centrality parameter or ncp. These parameters are just an adjustment we make to any measure of effect. Let's inspect the math (sorry):
+
+$$
+ncp = \sqrt{N} * d
+$$
+
+where...
+
+$$
+N \equiv \mbox{Our Realized Sample Size}
+$$ and where "realized" qualifies the sample size based upon the appropriate and effective sample. For independent sample t-test, the N depends on the individual group sizes, one sample and dependent sample t-tests have singular N values - the number of observations (most often). We shall tackle sample size differences shortly. For now, N is just the sample size. Finally, our effect:
+
+$$
+d \equiv \mbox{Our Estimated or Observed Effect Size}
+$$ More often than not, we use Cohen's d (1988) because for most, it seems intuitive. Shortly, you will realize how counter-intuitive d really is in practice. But, to address d, we should look under the hood:
+
+$$
+d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
+$$ You have all seen this before as a z-score transform:
+
+$$
+z = \frac{x_i - \bar{X}}{s}
+$$ Instead of individual values, we just take the difference between two means $(\bar{X_1} - \bar{X_2})$ and divide by some special standard deviation $s_p$. That special standard deviation is necessary when we have different variances and sample sizes by group (or by time if a dependent sample t-test).
+
+# Why are point estimates of statistical power of limited use?
+
+
+
+
+# How do I setup a simulation of effects?
+
+## Basic Sampling
+
+The standardized normal scale is our mostly widely used option along with the t, F, and chi-square distributions. Psychological scientists mostly use a t or F distribution, and, for the purposes of this presentation, we restrict our discussion to only those distributions. As you will soon learn, it doesn't matter what scale we use to quantify the results. As long as we have a critical value to assess what might be "inconsistent with the null." The t and F distributions are the standard statistical distributions in our commonly-used inferential procedures (e.g., ANOVA, regression, etc.).
+
+Most of you may recall, the standard normal distribution allows z-scores to be compared to either zero (i.e., an implied, one-sample comparison) or another mean. The z-test was popular prior to William Gossett.
+
+------------------------------------------------------------------------
+
+**REFRESHER**
+
+> For those readers less familiar about the role Gosset played in the development of the t-statistic, I suggest you [watch this brief video](https://youtu.be/32CuxWdOlow?si=_hFY_TP72CGHSW9E){target="_blank"} that provides a nice overview.
+
+------------------------------------------------------------------------
+
+Let's look at the raw means and how that may relate to the t-test statistic:
+
+
+
+### Univariate Playground
+
+```{r}
+#| label: ui1
+#| panel: sidebar
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+sliderInput("Ndemo","Sample Size", min=0, max=1000, value=150)
+sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5)
+sliderInput("SDdemo", "SD", min = 0, max = 15, value=5)
+sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8)
+
+```
+
+```{r}
+#| panel: fill
+#| echo: false
+plotOutput("p1")
+```
+
+```{r}
+#| context: server
+#| echo: true
+  genDat <- reactive({
+      data.frame(obs=1:input$Ndemo, 
+                 x=rnorm(input$Ndemo, 
+                         input$MUdemo, 
+                         sqrt((input$SDdemo^2)/input$Rel)))
+  })
+  
+  output$p1 <- renderPlot({
+      # draw the histogram with the specified number of bins
+      ggplot(genDat(),aes(x=x)) + 
+         geom_histogram(aes(y = after_stat(density))) +
+         geom_density(fill = "#56B4E9", 
+                      alpha=.2) +
+         geom_vline(aes(xintercept = 0), 
+                    color = "blue", 
+                    linetype = "dashed", 
+                    size = 1) +
+         geom_vline(aes(xintercept = mean(x)), 
+                    color = "red", 
+                    size = 1) +
+         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
+                       xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
+                       ymin=0, ymax = Inf), 
+                   alpha = .01, fill = "pink") + 
+      theme_xkcd()
+  })
+```
+
+## Multi-Mean Playground
+
+```{r}
+#| label: ui2
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+#| layout-ncol: 2
+#| layout-nrow: 4
+sliderInput("N1","Sample Size (Group 1)", min=0, max=1000, value=150)
+sliderInput("N2","Sample Size (Group 2)", min=0, max=1000, value=150)
+
+sliderInput("MU1", "Mean (Group 1)", min = 0, max = 15, value=5)
+sliderInput("MU2", "Mean (Group 2)", min = 0, max = 15, value=5)
+
+sliderInput("SD1", "SD (Group 1)", min = 0, max = 15, value=5)
+sliderInput("SD2", "SD (Group 2)", min = 0, max = 15, value=5)
+
+sliderInput("Rel1","Meas Reliability (Group 1)", min=0, max=1, value = .8)
+sliderInput("Rel2","Meas Reliability (Group 2)", min=0, max=1, value = .8)
+```
+
+```{r}
+#| label: ui3
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+#| layout-ncol: 1
+#| layout-nrow: 4
+
+
+```
+
+```{r}
+#| panel: fill
+#| echo: false
+plotOutput("p2")
+```
+
+```{r}
+#| context: server
+#| echo: true
+  genDat2 <- reactive({
+      data.frame(grp=as.factor(c(rep(1,input$N1),rep(2,input$N2))), 
+                 x=c(rnorm(input$N1, 
+                         input$MU1, 
+                         sqrt((input$SD1^2)/input$Rel1)),
+                     rnorm(input$N2, 
+                         input$MU2, 
+                         sqrt((input$SD2^2)/input$Rel2))
+                     ))
+  })
+  
+  output$p2 <- renderPlot({
+      # draw the histogram with the specified number of bins
+      ggplot(genDat2(),aes(x=x, group = grp, fill=grp)) + 
+         geom_histogram(aes(y = after_stat(density))) +
+         geom_density(fill = "#56B4E9", 
+                      alpha=.2) +
+         geom_vline(aes(xintercept = 0), 
+                    color = "blue", 
+                    linetype = "dashed", 
+                    size = 1) +
+         geom_vline(aes(xintercept = mean(x)), 
+                    color = "red", 
+                    size = 1) +
+         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
+                       xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
+                       ymin=0, ymax = Inf), 
+                   alpha = .01, fill = "pink") + 
+      theme_xkcd()
+  })
+```
+
+# Where can I go for more help?
