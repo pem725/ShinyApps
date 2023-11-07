@@ -14,6 +14,12 @@ author:
         department:  Department of Psychology
         address: Fairfax, VA
         url: https://www.mres-gmu.org
+  - name: Simonce C. McKnight
+    id: scm
+    email: scmcknight714@gmail.com
+    affiliation:
+      - name: McKnight Consulting, LLC
+        url: google.com
 abstract:  |
   Power - the probably of success in the frequentist world - gets attention mostly out of necessity. Many see power analyses as a hurdle to get funding while others treat it as privileged domain for the technically capable. Neither reality need be true in this brave new world. We plan to shed a different light on the topic by demonstrating power analysis by simulation. No, we are not using large language models to estimate power but we are using the power of randomization to generate data and, in turn, power estimates. You will learn that you too can do the very same with little to no technical knowledge. Come, learn, and later teach us after you perfect the techniques.
 keywords:
@@ -26,7 +32,7 @@ copyright:
   year: 2023
 format: 
   html:
-    code-fold: show
+    code-fold: true
     code-summary: "Show the Code"
 execute:
   echo: true
@@ -43,10 +49,20 @@ After today, you will be able to answser (correctly) the following questions:
 
 1.  [What is statistical power?]
 2.  [Why are point estimates of statistical power of limited use?]
-3.  [How do I setup a simulation of effects?]
+3.  [How do I simulate effects?]
 4.  [Where can I go for more help?]
 
 If you think you can answer each without much hesitation, sit back and enjoy the show; otherwise, sit up, grab your own computer, load this file, and get ready to learn!
+
+```{r}
+#| eval: false
+#| code-fold: true
+
+# ANYONE PAYING ATTENTION TO THE CODE?
+```
+
+
+
 
 ------------------------------------------------------------------------
 
@@ -168,13 +184,11 @@ The second element to understanding statistical power is the effect size.  My gr
 $$
 d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
 $$ 
-The effects expressed in Cohen's d units are centered at zero (i.e., the mean effect equals zero or no effect at the center of the distribution) with each unit from the center equal to one standard deviation.  In short, a z-score.  Cohen's d is a standardized measure of effect that is centered at zero but unbounded in both directions (positive or negative effects; thus, $-\infty < d < \infty$).   Articles citing Gene Glass and Jacob Cohen [(e.g., Sullivan & Feinn, 2012; see Tables 1 and 2) ](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3444174/#:~:text=Cohen's%20term%20d%20is%20an,large%20(d%20%E2%89%A5%200.8).&text=According%20to%20Cohen%2C%20%E2%80%9Ca%20medium,eye%20of%20a%20careful%20observer.){target="_blank"} continued to stoke the flames of heuristics when assigning effect size estimates.  They said:
+The effects expressed in Cohen's d units are centered at zero (i.e., the mean effect equals zero or no effect at the center of the distribution) with each unit from the center equal to one standard deviation.  In short, a z-score.  Cohen's d is a standardized measure of effect that is centered at zero but unbounded in both directions (positive or negative effects; thus, $-\infty < d < \infty$).   Articles citing Gene Glass and Jacob Cohen [(e.g., Sullivan & Feinn, 2012 - cited over 5000 times; see Tables 1 and 2) ](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3444174/#:~:text=Cohen's%20term%20d%20is%20an,large%20(d%20%E2%89%A5%200.8).&text=According%20to%20Cohen%2C%20%E2%80%9Ca%20medium,eye%20of%20a%20careful%20observer.){target="_blank"} continued to stoke the flames of heuristics when assigning effect size estimates.  They said:
 
 > The denominator standardizes the difference by transforming the absolute difference into standard deviation units. Cohen's term d is an example of this type of effect size index. Cohen classified effect sizes as small ($d = 0.2$), medium ($d = 0.5$), and large ($d \geq 0.8$). According to Cohen, "a medium effect of .5 is visible to the naked eye of a careful observer. A small effect of .2 is noticeably smaller than medium but not so small as to be trivial. A large effect of .8 is the same distance above the medium as small is below it." These designations large, medium, and small do not take into account other variables such as the accuracy of the assessment instrument and the diversity of the study population. However these ballpark categories provide a general guide that should also be informed by context.
 
-The unfortunate effect of such heuristics is that most social scientists ignored the last part where they acknowledged the omission of so many relevant variables when assigning these values.  Thus, failure to account for them leads most of us to find values in our favor and rely on the heuristics to justify them.  
-
-# ZZZZ NEED transition here
+The unfortunate effect of such heuristics is that most social scientists ignored the last part where these authors acknowledged the omission of so many relevant variables when assigning these values.  Thus, failure to account for them leads most of us to find values in our favor and rely on the heuristics to justify them.  We shall not succumb to such barbarism.  Heuristics are to be challenged and recognized for what they are most often - a crutch to avoid thinking deeply about a problem.  We now have the tools at our disposal to shake off these rough estimates and start thinking a bit deeper about estimating the chances of our own success.  Wouldn't that be nice?  We need to calculate power.
 
 ## Calculating Power
 
@@ -188,6 +202,7 @@ The essence of the code to compute statistical power for a two-tailed, two-sided
 #| echo: true
 #| label: RcodePower
 #| eval: false
+#| code-fold: show
     n <- 100 # sample size
     ng <- 2 # number of groups
     d <- .3 # effect size
@@ -202,7 +217,7 @@ The essence of the code to compute statistical power for a two-tailed, two-sided
       pt(-qu, nu, ncp, lower = TRUE)
 ```
 
-
+A better way to show the simplicity is to create a dynamic object here that you can play with while you develop a level of numeracy few in the field possess:
 
 
 ```{r}
@@ -233,9 +248,6 @@ plotOutput("pP1")
     nu <- (input$n - 1) * input$ng
     qu <- qt(input$sl/2, nu, lower = FALSE)
     ncp <- sqrt(input$n/input$ng) * input$d
-
-    
-
     df <- (input$n/input$ng) - 1
     qu <- qt(input$sl/2, df, lower = FALSE)
     # Code for plot
@@ -262,13 +274,8 @@ plotOutput("pP1")
 
   })
 ```
-```{r}
 
-```
-
-
-
-
+Now that you have the hang of it.  Let's dive a little deeper into the details so you can be a bit more informed about which values to choose, when, and why.  Here goes...
 
 ### What's the effect?
 
@@ -282,11 +289,15 @@ where...
 
 $$
 N \equiv \mbox{Our Realized Sample Size}
-$$ and where "realized" qualifies the sample size based upon the appropriate and effective sample. For independent sample t-test, the N depends on the individual group sizes, one sample and dependent sample t-tests have singular N values - the number of observations (most often). We shall tackle sample size differences shortly. For now, N is just the sample size. Finally, our effect:
+$$ 
+
+and where "realized" qualifies the sample size based upon the appropriate and effective sample. For independent sample t-test, the N depends on the individual group sizes, one sample and dependent sample t-tests have singular N values - the number of observations (most often); otherwise, N is the average sample size across groups.  The software often selects the appropriate N for you leading us to make some wildly inaccurate guesses.  Next is our computed effect (d).
 
 $$
 d \equiv \mbox{Our Estimated or Observed Effect Size}
-$$ More often than not, we use Cohen's d (1988) because for most, it seems intuitive. Shortly, you will realize how counter-intuitive d really is in practice. But, to address d, we should look under the hood:
+$$ 
+
+More often than not, we use Cohen's d (1988) because for most, it seems intuitive. Shortly, you will realize how counter-intuitive d really is in practice. But, to address d, we should look under the hood:
 
 $$
 d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
@@ -294,14 +305,32 @@ $$ You have all seen this before as a z-score transform:
 
 $$
 z = \frac{x_i - \bar{X}}{s}
-$$ Instead of individual values, we just take the difference between two means $(\bar{X_1} - \bar{X_2})$ and divide by some special standard deviation $s_p$. That special standard deviation is necessary when we have different variances and sample sizes by group (or by time if a dependent sample t-test).
+$$ 
+
+Instead of individual values, we just take the difference between two means $(\bar{X_1} - \bar{X_2})$ and divide by some special standard deviation $s_p$. That special standard deviation is necessary when we have different variances and sample sizes by group (or by time if a dependent sample t-test).
+
+Computing statistical power only involves a few decisions for N and d; the significance level ($p < 0.05$) gets set by others.  If selecting only two values is all we really need to do, what is the big deal about this presentation?  The point estimates are misleading and often give us an inaccurate probability of our own success.  We move boldly into the unknown without the knowledge that a few more subjects placed in the right group with proper attention to treatment fidelity and measurement error will ensure our success.  Ignorance is not bliss here - it is time and money.  Let's save some time and money by realizing the real problem.
 
 # Why are point estimates of statistical power of limited use?
 
+We made all these estimates above with such confidence that I forgot to mention that we never know any of these values when planning our research.  None of them.  We guess.  We guess in our favor; we guess with gusto; and we guess poorly more often than not.  Why?  Simply put, we invest too much time trying to get some point estimates of completely wild guesses.  By busying ourselves with these micro-fine estimates, we forget that we guessed **EVERY PART OF THE EQUATION**.  Think about the situation carefully before you reflexively disagree.  
 
+------------------------------------------------------------------------
 
+**THOUGHT EXERCISE**
 
-# How do I setup a simulation of effects?
+> I plan a study to sample 200 undergraduates that will be randomly assigned to one of two groups.  Each participant requires 15 minutes of research staff time to collect the data.  Previous research indicates that the expected effect size for my "treatment" is about a 20 pt difference on a measure that ranges from 0 to 100.  That measure, however, requires my research staff to spend over an hour per participant and we do not have the resources to spend. Thus, we use a shortened version of the measure that has a test-retest reliability of $r_{xx} = .9$ and a correlation with the full scale of $r = .8$.  Given the differences in the measure, we assume that the 20 pt difference was about a standard deviation in previous studies.  Even if the standard deviation were twice that value, we believe the expected effect would be about $d = 0.5$ or a "medium" effect.  Sound familiar?
+
+------------------------------------------------------------------------
+
+Cohen was not correct in his qualitative assessment of effect size estimates.  He was correct under very strict conditions of which few researchers today find themselves.  Those qualitative anchors are no more valid today than when they were first published.  Still, many of us rely on guesses that fall "within the range" of those qualitative anchors. We find ourselves, today, with a much more complex world where effect size estimates are greatly affected by sampling, measurement, and treatment fidelity.  Few of us anticipate how these factors may affect our results; we are quick to notice how they may affect other researcher's work.  Again, self-serving biases affect us all.  
+
+If point estimates are not the answer to our statistical power estimate problems then what is the magic elixir?  There are none.  With some proper guidance, you can setup a simulation to model your expected results.   Once modeled, you can adjust the settings to accommodate "best" and "worst" case scenarios.  
+
+# How do I simulate effects?
+
+Simulation requires a little knowledge of the models you wish to run.  I will start with a basic model (independent sample t-test), and move to more complicated models (linear mixed effects or lmer models) quite rapidly via regression and ANOVA models.  To make the transition easier, I plan to walk very slowly through some of the rudiments of simulation.  First, we start with sampling and move from univariate samples to multivariate samples.  You do not need a strong background in R or Python to follow along.  The code is available on my repository.  Please help yourself to my code but please acknowledge the source.
+
 
 ## Basic Sampling
 
