@@ -8,7 +8,7 @@
 
 <meta name="author" content="Patrick E. McKnight">
 <meta name="author" content="Simonce C. McKnight">
-<meta name="dcterms.date" content="2023-11-06">
+<meta name="dcterms.date" content="2023-11-07">
 <meta name="keywords" content="Statistical Power, Simulation, R/shiny">
 
 <title>Simulating data to estimate power</title>
@@ -119,7 +119,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 6, 2023</p>
+        <p class="date">November 7, 2023</p>
       </div>
     </div>
     
@@ -157,7 +157,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   </ul></li>
   <li><a href="#why-are-point-estimates-of-statistical-power-of-limited-use" id="toc-why-are-point-estimates-of-statistical-power-of-limited-use" class="nav-link" data-scroll-target="#why-are-point-estimates-of-statistical-power-of-limited-use">Why are point estimates of statistical power of limited use?</a></li>
-  <li><a href="#how-do-i-setup-a-simulation-of-effects" id="toc-how-do-i-setup-a-simulation-of-effects" class="nav-link" data-scroll-target="#how-do-i-setup-a-simulation-of-effects">How do I setup a simulation of effects?</a>
+  <li><a href="#how-do-i-simulate-effects" id="toc-how-do-i-simulate-effects" class="nav-link" data-scroll-target="#how-do-i-simulate-effects">How do I simulate effects?</a>
   <ul class="collapse">
   <li><a href="#basic-sampling" id="toc-basic-sampling" class="nav-link" data-scroll-target="#basic-sampling">Basic Sampling</a>
   <ul class="collapse">
@@ -179,7 +179,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li><a href="#what-is-statistical-power">What is statistical power?</a></li>
 <li><a href="#why-are-point-estimates-of-statistical-power-of-limited-use">Why are point estimates of statistical power of limited use?</a></li>
-<li><a href="#how-do-i-setup-a-simulation-of-effects">How do I setup a simulation of effects?</a></li>
+<li><a href="#how-do-i-simulate-effects">How do I simulate effects?</a></li>
 <li><a href="#where-can-i-go-for-more-help">Where can I go for more help?</a></li>
 </ol>
 <p>If you think you can answer each without much hesitation, sit back and enjoy the show; otherwise, sit up, grab your own computer, load this file, and get ready to learn!</p>
@@ -277,7 +277,7 @@ H_0: \mbox{Null Hypothesis } (Dogs = cats)
 <p>The second element to understanding statistical power is the effect size. My graduate advisor (Lee Sechrest) wrote a <a href="https://deepblue.lib.umich.edu/bitstream/handle/2027.42/67520/10.1177_0193841X8200600501.pdf?sequence=2" target="_blank">great piece</a> on the variety of estimates that could be used to quantify effect sizes. Furthermore, he and his colleague Bill Yeaton (1981) <a href="https://www.researchgate.net/profile/Lee-Sechrest/publication/232502571_Meaningful_measures_of_effect/links/53e9906c0cf2fb1b9b6715f9/Meaningful-measures-of-effect.pdf" target="_blank">argued that such measures of effect were almost entirely meaningless</a> unless calibrated to some known standards (e.g., money, lives, etc.). Today, these measures of effect are mere guesses of terribly uncertain outcomes. We guess numbers without knowing much about how they may represent our future. The numerical guesses are almost always self-serving in that they allow us to have smaller samples (see above) as a trade-off for larger effects. We argue that the large expected effect is justifiable because some relevant literature or recent efforts provide a hint of a “large effect.” What we then do is assign a numerical value to that effect size to match the large effect. Here is the effect we are computing in most cases for power analysis:</p>
 <p><span class="math display">\[
 d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
-\]</span> The effects expressed in Cohen’s d units are centered at zero (i.e., the mean effect equals zero or no effect at the center of the distribution) with each unit from the center equal to one standard deviation. In short, a z-score. Cohen’s d is a standardized measure of effect that is centered at zero but unbounded in both directions (positive or negative effects; thus, <span class="math inline">\(-\infty &lt; d &lt; \infty\)</span>). Articles citing Gene Glass and Jacob Cohen <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3444174/#:~:text=Cohen's%20term%20d%20is%20an,large%20(d%20%E2%89%A5%200.8).&amp;text=According%20to%20Cohen%2C%20%E2%80%9Ca%20medium,eye%20of%20a%20careful%20observer." target="_blank">(e.g., Sullivan &amp; Feinn, 2012; see Tables 1 and 2)</a> continued to stoke the flames of heuristics when assigning effect size estimates. They said:</p>
+\]</span> The effects expressed in Cohen’s d units are centered at zero (i.e., the mean effect equals zero or no effect at the center of the distribution) with each unit from the center equal to one standard deviation. In short, a z-score. Cohen’s d is a standardized measure of effect that is centered at zero but unbounded in both directions (positive or negative effects; thus, <span class="math inline">\(-\infty &lt; d &lt; \infty\)</span>). Articles citing Gene Glass and Jacob Cohen <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3444174/#:~:text=Cohen's%20term%20d%20is%20an,large%20(d%20%E2%89%A5%200.8).&amp;text=According%20to%20Cohen%2C%20%E2%80%9Ca%20medium,eye%20of%20a%20careful%20observer." target="_blank">(e.g., Sullivan &amp; Feinn, 2012 - cited over 5000 times; see Tables 1 and 2)</a> continued to stoke the flames of heuristics when assigning effect size estimates. They said:</p>
 <blockquote class="blockquote">
 <p>The denominator standardizes the difference by transforming the absolute difference into standard deviation units. Cohen’s term d is an example of this type of effect size index. Cohen classified effect sizes as small (<span class="math inline">\(d = 0.2\)</span>), medium (<span class="math inline">\(d = 0.5\)</span>), and large (<span class="math inline">\(d \geq 0.8\)</span>). According to Cohen, “a medium effect of .5 is visible to the naked eye of a careful observer. A small effect of .2 is noticeably smaller than medium but not so small as to be trivial. A large effect of .8 is the same distance above the medium as small is below it.” These designations large, medium, and small do not take into account other variables such as the accuracy of the assessment instrument and the diversity of the study population. However these ballpark categories provide a general guide that should also be informed by context.</p>
 </blockquote>
@@ -307,6 +307,7 @@ d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pt</span>(<span class="sc">-</span>qu, nu, ncp, <span class="at">lower =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>A better way to show the simplicity is to create a dynamic object here that you can play with while you develop a level of numeracy few in the field possess:</p>
 <div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
 <div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7" data-fill="true">
 <div class="cell-output-display">
@@ -318,7 +319,7 @@ d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{
 <div class="cell-output-display">
 <div class="form-group shiny-input-container">
 <label class="control-label" id="d-label" for="d">Effect Size</label>
-<input class="js-range-slider" id="d" data-skin="shiny" data-min="0" data-max="2" data-from="0.25" data-step="0.01" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
+<input class="js-range-slider" id="d" data-skin="shiny" data-min="0" data-max="1.5" data-from="0.25" data-step="0.01" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
 </div>
 </div>
 <div class="cell-output-display">
@@ -344,6 +345,7 @@ d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{
 </div>
 </div>
 </div>
+<p>Now that you have the hang of it. Let’s dive a little deeper into the details so you can be a bit more informed about which values to choose, when, and why. Here goes…</p>
 </section>
 <section id="whats-the-effect" class="level3">
 <h3 class="anchored" data-anchor-id="whats-the-effect">What’s the effect?</h3>
@@ -354,16 +356,20 @@ ncp = \sqrt{N} * d
 <p>where…</p>
 <p><span class="math display">\[
 N \equiv \mbox{Our Realized Sample Size}
-\]</span> and where “realized” qualifies the sample size based upon the appropriate and effective sample. For independent sample t-test, the N depends on the individual group sizes, one sample and dependent sample t-tests have singular N values - the number of observations (most often). We shall tackle sample size differences shortly. For now, N is just the sample size. Finally, our effect:</p>
+\]</span></p>
+<p>and where “realized” qualifies the sample size based upon the appropriate and effective sample. For independent sample t-test, the N depends on the individual group sizes, one sample and dependent sample t-tests have singular N values - the number of observations (most often); otherwise, N is the average sample size across groups. The software often selects the appropriate N for you leading us to make some wildly inaccurate guesses. Next is our computed effect (d).</p>
 <p><span class="math display">\[
 d \equiv \mbox{Our Estimated or Observed Effect Size}
-\]</span> More often than not, we use Cohen’s d (1988) because for most, it seems intuitive. Shortly, you will realize how counter-intuitive d really is in practice. But, to address d, we should look under the hood:</p>
+\]</span></p>
+<p>More often than not, we use Cohen’s d (1988) because for most, it seems intuitive. Shortly, you will realize how counter-intuitive d really is in practice. But, to address d, we should look under the hood:</p>
 <p><span class="math display">\[
 d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
 \]</span> You have all seen this before as a z-score transform:</p>
 <p><span class="math display">\[
 z = \frac{x_i - \bar{X}}{s}
-\]</span> Instead of individual values, we just take the difference between two means <span class="math inline">\((\bar{X_1} - \bar{X_2})\)</span> and divide by some special standard deviation <span class="math inline">\(s_p\)</span>. That special standard deviation is necessary when we have different variances and sample sizes by group (or by time if a dependent sample t-test).</p>
+\]</span></p>
+<p>Instead of individual values, we just take the difference between two means <span class="math inline">\((\bar{X_1} - \bar{X_2})\)</span> and divide by some special standard deviation <span class="math inline">\(s_p\)</span>. That special standard deviation is necessary when we have different variances and sample sizes by group (or by time if a dependent sample t-test).</p>
+<p>Computing statistical power only involves a few decisions for N and d; the significance level (<span class="math inline">\(p &lt; 0.05\)</span>) gets set by others. If selecting only two values is all we really need to do, what is the big deal about this presentation? The point estimates are misleading and often give us an inaccurate probability of our own success. We move boldly into the unknown without the knowledge that a few more subjects placed in the right group with proper attention to treatment fidelity and measurement error will ensure our success. Ignorance is not bliss here - it is time and money. Let’s save some time and money by realizing the real problem.</p>
 </section>
 </section>
 </section>
@@ -376,11 +382,12 @@ z = \frac{x_i - \bar{X}}{s}
 <p>I plan a study to sample 200 undergraduates that will be randomly assigned to one of two groups. Each participant requires 15 minutes of research staff time to collect the data. Previous research indicates that the expected effect size for my “treatment” is about a 20 pt difference on a measure that ranges from 0 to 100. That measure, however, requires my research staff to spend over an hour per participant and we do not have the resources to spend. Thus, we use a shortened version of the measure that has a test-retest reliability of <span class="math inline">\(r_{xx} = .9\)</span> and a correlation with the full scale of <span class="math inline">\(r = .8\)</span>. Given the differences in the measure, we assume that the 20 pt difference was about a standard deviation in previous studies. Even if the standard deviation were twice that value, we believe the expected effect would be about <span class="math inline">\(d = 0.5\)</span> or a “medium” effect. Sound familiar?</p>
 </blockquote>
 <hr>
-<p>Cohen was not correct in his qualitative assessment of effect size estimates. He was correct under very strict conditions of which few researchers today find themselves. Those qualitative anchors are no more valid today than when they were first published. Still, many of us rely on guesses that fall “within the range” of those qualitative anchors.</p>
-<p>Instead, we find ourselves with a much more complex world where effect size estimates are greatly affected by sampling, measurement, and treatment fidelity. Few of us anticipate how these factors may affect our results; we are quick to notice how they may affect other’s work. Again, self-serving biases affect us all.</p>
+<p>Cohen was not correct in his qualitative assessment of effect size estimates. He was correct under very strict conditions of which few researchers today find themselves. Those qualitative anchors are no more valid today than when they were first published. Still, many of us rely on guesses that fall “within the range” of those qualitative anchors. We find ourselves, today, with a much more complex world where effect size estimates are greatly affected by sampling, measurement, and treatment fidelity. Few of us anticipate how these factors may affect our results; we are quick to notice how they may affect other researcher’s work. Again, self-serving biases affect us all.</p>
+<p>If point estimates are not the answer to our statistical power estimate problems then what is the magic elixir? There are none. With some proper guidance, you can setup a simulation to model your expected results. Once modeled, you can adjust the settings to accommodate “best” and “worst” case scenarios.</p>
 </section>
-<section id="how-do-i-setup-a-simulation-of-effects" class="level1">
-<h1>How do I setup a simulation of effects?</h1>
+<section id="how-do-i-simulate-effects" class="level1">
+<h1>How do I simulate effects?</h1>
+<p>Simulation requires a little knowledge of the models you wish to run. I will start with a basic model (independent sample t-test), and move to more complicated models (linear mixed effects or lmer models) quite rapidly via regression and ANOVA models. To make the transition easier, I plan to walk very slowly through some of the rudiments of simulation. First, we start with sampling and move from univariate samples to multivariate samples. You do not need a strong background in R or Python to follow along. The code is available on my repository. Please help yourself to my code but please acknowledge the source.</p>
 <section id="basic-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="basic-sampling">Basic Sampling</h2>
 <p>The standardized normal scale is our mostly widely used option along with the t, F, and chi-square distributions. Psychological scientists mostly use a t or F distribution, and, for the purposes of this presentation, we restrict our discussion to only those distributions. As you will soon learn, it doesn’t matter what scale we use to quantify the results. As long as we have a critical value to assess what might be “inconsistent with the null.” The t and F distributions are the standard statistical distributions in our commonly-used inferential procedures (e.g., ANOVA, regression, etc.).</p>
@@ -399,19 +406,19 @@ z = \frac{x_i - \bar{X}}{s}
 <div class="cell-output-display">
 <div class="form-group shiny-input-container">
 <label class="control-label" id="Ndemo-label" for="Ndemo">Sample Size</label>
-<input class="js-range-slider" id="Ndemo" data-skin="shiny" data-min="0" data-max="1000" data-from="150" data-step="1" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
+<input class="js-range-slider" id="Ndemo" data-skin="shiny" data-min="0" data-max="500" data-from="150" data-step="10" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
 </div>
 </div>
 <div class="cell-output-display">
 <div class="form-group shiny-input-container">
 <label class="control-label" id="MUdemo-label" for="MUdemo">Mean</label>
-<input class="js-range-slider" id="MUdemo" data-skin="shiny" data-min="0" data-max="15" data-from="5" data-step="1" data-grid="true" data-grid-num="7.5" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
+<input class="js-range-slider" id="MUdemo" data-skin="shiny" data-min="0" data-max="1.5" data-from="1" data-step="0.01" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
 </div>
 </div>
 <div class="cell-output-display">
 <div class="form-group shiny-input-container">
 <label class="control-label" id="SDdemo-label" for="SDdemo">SD</label>
-<input class="js-range-slider" id="SDdemo" data-skin="shiny" data-min="0" data-max="15" data-from="5" data-step="1" data-grid="true" data-grid-num="7.5" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
+<input class="js-range-slider" id="SDdemo" data-skin="shiny" data-min="0" data-max="5" data-from="1" data-step="0.01" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number">
 </div>
 </div>
 <div class="cell-output-display">
@@ -580,7 +587,9 @@ library('bslib') # the prime driver here for UI
                        xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
                        ymin=0, ymax = Inf), 
                    alpha = .01, fill = "pink") + 
-      theme_xkcd()
+      theme_xkcd() #+
+      #annotate(paste("power = ",
+      #               round(pwr.t.test(n = input$Ndemo, d = input$MUdemo/(sqrt((input$SDdemo^2)/input$Rel))), 2), sep=""), x = , y = , label = "Power")
   })
 </script>
  

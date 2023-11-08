@@ -57,12 +57,8 @@ If you think you can answer each without much hesitation, sit back and enjoy the
 ```{r}
 #| eval: false
 #| code-fold: true
-
 # ANYONE PAYING ATTENTION TO THE CODE?
 ```
-
-
-
 
 ------------------------------------------------------------------------
 
@@ -138,16 +134,16 @@ and where...
 $$
 t = \frac{\bar{X}_1 - \bar{X}_2}{SE} =\frac{\bar{X}_{IQ|Dog} - \bar{X}_{IQ|cat}}{\sqrt{\frac{s_{ID|Dog}^2}{n_{Dog}} + \frac{s_{ID|cat}^2}{n_{cat}}}} = 2.23
 $$
-Remember, I made up this result.
+Remember, I made up this result so all you cat lovers can just relax.
 
-What does that $\mbox{math speak}$ mean?
-
-$$
-P(): \mbox{Probablity (range 0 - 1)}
-$$
+What does that $\mbox{math speak}$ really mean and what values can we expect from each?  Good questions.
 
 $$
-Result:  \mbox{Statistic computed (mean difference)}
+P(): \mbox{Probablity; range: 0 - 1}
+$$
+
+$$
+Result:  \mbox{Statistic computed (mean difference); range: } -\infty - +\infty 
 $$
 In the example above, we used the t-statistic to get an estimate of the result.
 
@@ -228,7 +224,7 @@ A better way to show the simplicity is to create a dynamic object here that you 
 #| collapse: false
 #| include: true
 sliderInput("n","Total Sample Size", min=0, max=500, step= 5, value=150)
-sliderInput("d", "Effect Size", min = 0, max = 2, step= .01, value=.25)
+sliderInput("d", "Effect Size", min = 0, max = 1.5, step= .01, value=.25)
 sliderInput("ng", "Number of Groups", min = 1, max = 4, step=1,value=2)
 sliderInput("sl", "Significance Level", min = .001, max = .1, step=.001, value=.05)
 
@@ -331,7 +327,6 @@ If point estimates are not the answer to our statistical power estimate problems
 
 Simulation requires a little knowledge of the models you wish to run.  I will start with a basic model (independent sample t-test), and move to more complicated models (linear mixed effects or lmer models) quite rapidly via regression and ANOVA models.  To make the transition easier, I plan to walk very slowly through some of the rudiments of simulation.  First, we start with sampling and move from univariate samples to multivariate samples.  You do not need a strong background in R or Python to follow along.  The code is available on my repository.  Please help yourself to my code but please acknowledge the source.
 
-
 ## Basic Sampling
 
 The standardized normal scale is our mostly widely used option along with the t, F, and chi-square distributions. Psychological scientists mostly use a t or F distribution, and, for the purposes of this presentation, we restrict our discussion to only those distributions. As you will soon learn, it doesn't matter what scale we use to quantify the results. As long as we have a critical value to assess what might be "inconsistent with the null." The t and F distributions are the standard statistical distributions in our commonly-used inferential procedures (e.g., ANOVA, regression, etc.).
@@ -348,8 +343,6 @@ Most of you may recall, the standard normal distribution allows z-scores to be c
 
 Let's look at the raw means and how that may relate to the t-test statistic:
 
-
-
 ### Univariate Playground
 
 ```{r}
@@ -359,10 +352,10 @@ Let's look at the raw means and how that may relate to the t-test statistic:
 #| echo: false
 #| collapse: false
 #| include: true
-sliderInput("Ndemo","Sample Size", min=0, max=1000, value=150)
-sliderInput("MUdemo", "Mean", min = 0, max = 15, value=5)
-sliderInput("SDdemo", "SD", min = 0, max = 15, value=5)
-sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8)
+sliderInput("Ndemo","Sample Size", min=0, max=500, value=150, step=10)
+sliderInput("MUdemo", "Mean", min = 0, max = 1.5, value=1, step=.01)
+sliderInput("SDdemo", "SD", min = 0, max = 5, value=1, step=.01)
+sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8, step=.01)
 
 ```
 
@@ -399,7 +392,9 @@ plotOutput("p1")
                        xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
                        ymin=0, ymax = Inf), 
                    alpha = .01, fill = "pink") + 
-      theme_xkcd()
+      theme_xkcd() #+
+      #annotate(paste("power = ",
+      #               round(pwr.t.test(n = input$Ndemo, d = input$MUdemo/(sqrt((input$SDdemo^2)/input$Rel))), 2), sep=""), x = , y = , label = "Power")
   })
 ```
 
