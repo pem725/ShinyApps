@@ -14,7 +14,7 @@ author:
         department:  Department of Psychology
         address: Fairfax, VA
         url: https://www.mres-gmu.org
-  - name: Simonce C. McKnight
+  - name: Simone C. McKnight
     id: scm
     email: scmcknight714@gmail.com
     affiliation:
@@ -69,9 +69,10 @@ If you think you can answer each without much hesitation, sit back and enjoy the
 ------------------------------------------------------------------------
 
 # Housekeeping
-Setup the R environment for the remainder of the talk.
+Setup the R environment for the remainder of the talk.  Be sure to install all these required libraries in your R environment.  
+
 ```{r}
-#| label: setup
+#| label: setupLibs
 #| include: true
 #| echo: true
 #| error: false
@@ -88,9 +89,10 @@ library('nlme')
 library('lavaan')
 library('dplyr')
 library('bslib') # the prime driver here for UI
+library('simpr')
+library('tidyverse')
+library('shiny')
 ```
-
-
 
 # What is Statistical Power?
 
@@ -297,7 +299,9 @@ More often than not, we use Cohen's d (1988) because for most, it seems intuitiv
 
 $$
 d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{\mbox{Standard Deviation}}
-$$ You have all seen this before as a z-score transform:
+$$ 
+
+You have all seen this before as a z-score transform:
 
 $$
 z = \frac{x_i - \bar{X}}{s}
@@ -341,6 +345,11 @@ Most of you may recall, the standard normal distribution allows z-scores to be c
 
 ------------------------------------------------------------------------
 
+Simulation requires some numeracy.  The applets above provide you with some relatively high level control over the computation of statistical power.  We can change the means, standard deviations, and such to some effect; the real challenge is to model your data in such a way to best understand what makes a difference and how it makes a difference.  I begin your journey toward numeracy with two simple applications.
+
+
+
+
 Let's look at the raw means and how that may relate to the t-test statistic:
 
 ### Univariate Playground
@@ -355,7 +364,7 @@ Let's look at the raw means and how that may relate to the t-test statistic:
 sliderInput("Ndemo","Sample Size", min=0, max=500, value=150, step=10)
 sliderInput("MUdemo", "Mean", min = 0, max = 1.5, value=1, step=.01)
 sliderInput("SDdemo", "SD", min = 0, max = 5, value=1, step=.01)
-sliderInput("Rel","Reliability of Measure", min=0, max=1, value = .8, step=.01)
+sliderInput("Rel","Reliability of Measure", min=0, max=1, value = 1, step=.01)
 
 ```
 
@@ -368,11 +377,22 @@ plotOutput("p1")
 ```{r}
 #| context: server
 #| echo: true
+library(ggplot2)
+library(xkcd)
+library(pwr)
+
   genDat <- reactive({
       data.frame(obs=1:input$Ndemo, 
                  x=rnorm(input$Ndemo, 
                          input$MUdemo, 
                          sqrt((input$SDdemo^2)/input$Rel)))
+  })
+  
+  powerEst <- reactive({
+    round(pwr.t.test(n = input$Ndemo, 
+                     d= input$MUdemo/(sqrt((input$SDdemo^2)/input$Rel)),
+                     type = "one.sample",
+                     alternative = "two.sided")$power,2)
   })
   
   output$p1 <- renderPlot({
@@ -384,24 +404,24 @@ plotOutput("p1")
          geom_vline(aes(xintercept = 0), 
                     color = "blue", 
                     linetype = "dashed", 
-                    size = 1) +
+                    linewidth = 1) +
          geom_vline(aes(xintercept = mean(x)), 
                     color = "red", 
-                    size = 1) +
+                    linewidth = 1) +
          geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
                        xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
                        ymin=0, ymax = Inf), 
                    alpha = .01, fill = "pink") + 
-      theme_xkcd() #+
-      #annotate(paste("power = ",
-      #               round(pwr.t.test(n = input$Ndemo, d = input$MUdemo/(sqrt((input$SDdemo^2)/input$Rel))), 2), sep=""), x = , y = , label = "Power")
+      theme_xkcd() +
+      labs(title = paste("Power = ", powerEst(), sep=""))
   })
 ```
 
-## Multi-Mean Playground
+### Multi-Mean Playground
 
 ```{r}
 #| label: ui2
+#| panel: sidebar
 #| fill: true
 #| echo: false
 #| collapse: false
@@ -422,18 +442,6 @@ sliderInput("Rel2","Meas Reliability (Group 2)", min=0, max=1, value = .8)
 ```
 
 ```{r}
-#| label: ui3
-#| fill: true
-#| echo: false
-#| collapse: false
-#| include: true
-#| layout-ncol: 1
-#| layout-nrow: 4
-
-
-```
-
-```{r}
 #| panel: fill
 #| echo: false
 plotOutput("p2")
@@ -442,6 +450,8 @@ plotOutput("p2")
 ```{r}
 #| context: server
 #| echo: true
+library(tidyverse)
+
   genDat2 <- reactive({
       data.frame(grp=as.factor(c(rep(1,input$N1),rep(2,input$N2))), 
                  x=c(rnorm(input$N1, 
@@ -452,26 +462,256 @@ plotOutput("p2")
                          sqrt((input$SD2^2)/input$Rel2))
                      ))
   })
+
+  sumstats <- reactive({
+    genDat2() %>%
+      group_by(grp) %>%
+      summarize(x=mean(x))
+  })
+
+
   
   output$p2 <- renderPlot({
       # draw the histogram with the specified number of bins
       ggplot(genDat2(),aes(x=x, group = grp, fill=grp)) + 
          geom_histogram(aes(y = after_stat(density))) +
-         geom_density(fill = "#56B4E9", 
+         geom_density(#fill = "#56B4E9", 
                       alpha=.2) +
-         geom_vline(aes(xintercept = 0), 
-                    color = "blue", 
-                    linetype = "dashed", 
-                    size = 1) +
-         geom_vline(aes(xintercept = mean(x)), 
-                    color = "red", 
-                    size = 1) +
-         geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
-                       xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
-                       ymin=0, ymax = Inf), 
-                   alpha = .01, fill = "pink") + 
+        #geom_vline(aes(xintercept = 0), 
+        #            color = "blue", 
+        #            linetype = "dashed", 
+        #            size = 1) +
+         geom_vline(data = sumstats(), aes(xintercept = x,
+                        color=grp)) +
+         #geom_rect(aes(xmin = (mean(x) - 1.97*sd(x)/sqrt(length(x))),
+        #               xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
+        #               ymin=0, ymax = Inf), 
+        #           alpha = .01, fill = "pink") + 
       theme_xkcd()
   })
 ```
 
+
+## Regression Anyone?
+
+```{r}
+library(simpr)
+set.seed(100)
+simpr_tidy = ## Specify the simulation
+  specify(x1 = ~ 2 + rnorm(n),
+                       x2 = ~ 3 + 2*x1 + rnorm(n, 0, sd = 0.5),
+                       y = ~ 5 + x1 + x2 + g1*x1*x2 + 10 * rnorm(n)) %>%
+  ## Define varying parameters: here, sample size and effect size
+  define(n = seq(100, 300, by = 50),
+       g1 = seq(-1, 1, by = 0.5)) %>% 
+  ## Generate 10 repetitions
+  generate(10) %>% 
+  ## Fit models
+  fit(lm = ~lm(y ~ x1*x2))%>% 
+  ## Tidy each simulation using broom::tidy and
+  ## bind together
+  tidy_fits
+simpr_tidy
+
+library(dplyr)
+
+condition_power = simpr_tidy %>%
+  filter(term %in% "x1:x2") %>%
+  group_by(n, g1) %>%
+  summarize(power = mean(p.value < 0.05)) 
+
+condition_power
+
+library(ggplot2)
+
+condition_power %>% 
+  ggplot(aes(n, power)) +
+  geom_line() +
+  facet_grid(~g1)
+```
+
+
+
+
+```{r}
+#| label: uiMRC
+#| panel: input
+#| fill: true
+#| echo: false
+#| collapse: false
+#| include: true
+
+#helpText("Below are questions you ought to be able to address without too much trouble.  Think about a realistic study where you have two predictors (X1 and X2).  These predictors might be correlated with one another (i.e., colinearity is non-negligible).  Furthermore, you might have some general sense of how much of an effect might be possible.  The purpose of this application is to show you - the user - how simple these models are to simulate.  The hardest part was to create this incrediblyy cumbersome front-end.")
+
+#hr()
+#helpText("Think of a realistic sample size and range:")
+#sliderInput("SSmin","Minimum Sample Size", min=20, max = 50, value = 40)
+#sliderInput("SSmax","Maximum Possible Sample Size", min=60, max = 250, value = 100, step=10)
+#hr()
+#helpText("Estimate power for:")
+#checkboxInput("x1", "Significant X1 Predictor", FALSE)
+#conditionalPanel(
+#  condition = "input.x1 == 'TRUE'",
+#  sliderInput(
+#    "x1mean", "Mean of X1", min = 0, max = 10, value = 0
+#  ),
+#  sliderInput(
+#    "x1sd", "SD of X1", min = .1, max = 10, value = 1
+#  )
+#)
+#checkboxInput("x2", "Significant X2 Predictor", FALSE)
+#checkboxInput("int", "Significant Interaction", TRUE)
+#hr()
+#helpText("Multicollinearity")
+#sliderInput("mc","Correlation between predictors", min = 0, max = 1, value = 0, step = .1)
+#hr()
+#helpText("Overall Model Fit")
+#sliderInput("rsq","Rsquared", min = 0, max = 1, value = .3, step = .1)
+#hr()
+#sliderInput("resamples","How many iterations? (Be careful)", min=2, max=10, value = 2, step = 1)
+```
+
+
+```{r}
+#| panel: fill
+#| echo: false
+#plotOutput("pMRC")
+```
+
+
+```{r}
+#| context: server
+#| echo: true
+
+#library(simpr)
+#library(dplyr)
+
+#SimResults <- reactive({
+#  specify(x1 = ~ rnorm(n),
+#          x2 = ~ ((1/(input$mc^2)) - 1) * x1 + rnorm(n),
+#           y = ~ x1 + x2 + b3*x1*x2 + ((1/(1-input$rsq)) - 1) * rnorm(n)) %>%
+  ## Define varying parameters: here, sample size and effect size
+#  define(n = seq(input$SSmin, input$SSmax, by = 10),
+#       b3 = seq(-1, 1, by = 0.25)) %>% 
+  ## Generate 10 repetitions
+#  generate(input$resamples) %>% 
+  ## Fit models
+#  fit(lm = ~lm(y ~ x1*x2))%>% 
+  ## Tidy each simulation using broom::tidy and
+  ## bind together
+#  tidy_fits
+#})
+
+#powerCalcs <- reactive({
+#  SimResults() %>% 
+#    dplyr::filter(term %in% c("x1","x2","x1:x2")) %>%
+#    group_by(n, term, g1) %>%
+#    summarize(power = mean(p.value < 0.05)) 
+  
+  
+#  results() %>%
+#  filter(term %in% c("x1", "x2", "x1:x2")) %>%
+#  group_by(n, b3) %>%
+#  summarize(power = mean(p.value < 0.05)) 
+#})
+#condition_power()
+
+#output$pMRC <- renderPlot({
+#  powerCalcs() %>% 
+#  ggplot(aes(n, power)) +
+#  geom_line(aes(color=term)) +
+#  facet_grid(~b3)
+#})
+
+```
+
+
+
+## ANOVA models
+
+```{r}
+library(psych)
+
+data.df <- sim.anova(es1=1,es2=.5,es13=1)  # one main effect and one interaction
+describe(data.df)
+pairs.panels(data.df)   #show how the design variables are orthogonal
+#
+summary(lm(DV~IV1*IV2*IV3,data=data.df))
+summary(aov(DV~IV1*IV2*IV3,data=data.df))
+set.seed(42)
+ #demonstrate the effect of not centering the data on the regression
+data.df <- sim.anova(es1=1,es2=.5,es13=1,center=FALSE)  #
+describe(data.df)
+#
+#this one is incorrect, because the IVs are not centered
+summary(lm(DV~IV1*IV2*IV3,data=data.df)) 
+
+summary(aov(DV~IV1*IV2*IV3,data=data.df)) #compare with the lm model
+#now examine multiple levels and quadratic terms
+set.seed(42)
+data.df <- sim.anova(es1=1,es13=1,n2=3,n3=4,es22=1)
+summary(lm(DV~IV1*IV2*IV3,data=data.df))
+summary(aov(DV~IV1*IV2*IV3,data=data.df))
+pairs.panels(data.df)
+#
+data.df <- sim.anova(es1=1,es2=-.5,within=c(-1,0,1),n=10)
+pairs.panels(data.df)
+
+
+```
+
+
+## Linear Mixed Effects Models (lmer)
+
+
+```{r}
+
+library(designr)
+library(lme4)
+library(lmerTest)
+
+design <-
+  fixed.factor("X", levels=c("X1", "X2")) +
+  random.factor("Subj", instances=30)
+dat <- design.codes(design)
+contrasts(dat$X) <- c(-1, +1)
+
+dat$ysim <- simLMM(formula = ~ 1 + X + (1 + X | Subj),
+                   data = dat,
+                   Fixef = c(200, 10),
+                   VC_sd = list(c(30,10), 50),
+                   CP = 0.3,
+                   empirical = TRUE)
+
+dat$Xn <- ifelse(dat$X=="X1",-1,1)
+
+out <- lme4::lmer(ysim ~ Xn + (Xn || Subj), 
+           data=dat, 
+           control=lmerControl(calc.derivs=FALSE))
+
+summary(out)
+
+```
+
+
+## Longitudinal Data Analysis
+
+[See this fine package (longpower)](https://github.com/mcdonohue/longpower){target="_blank"}
+
+
+```{r}
+#library(longpower)
+
+#vignette(longpower)
+
+```
+
+
+## Structural Equations Modeling
+
+[TRY THIS](https://yilinandrewang.shinyapps.io/pwrSEM/){target="_blank"}
+
 # Where can I go for more help?
+
+
+

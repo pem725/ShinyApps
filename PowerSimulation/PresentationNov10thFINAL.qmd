@@ -1,0 +1,58 @@
+---
+title: "Power to the People!"
+author: "Patrick E. and Simone C. McKnight"
+format: 
+  revealjs:
+    incremental: true
+
+---
+
+---
+
+# Statistical Power
+
+$$
+P(\mbox{Party at the Pub! | Your Research Plans}) = \mbox{SWAG}
+$$
+Reads...
+
+> "the probability ($P()$) that you will $\mbox{Party at the Pub!}$ given ($\mbox{" | "}$) your plans to collect and analyze the data equals ($=$) a SWAG (or **S**cientific **W**ild **A**ss **G**uess)."
+
+
+---
+
+![](https://permaculturevisions.com/wp-content/uploads/2016/11/self-sufficiency-vs-self-reliance-e1478951707569.jpg)
+
+# Power Estimation toward Self-Reliance
+
+- Daunting (seemingly complex and unavailable)
+- Important (your success depends upon it)
+- Error Prone (easy to mislead yourself)
+- More available than commonly known (via simulation)
+
+# What you will learn today
+
+1. Power essentials
+2. Why and how to compute power
+3. Methods to simulate
+4. Resources to make you even more self-reliant
+
+# Housekeeping
+
+- Install R
+- Install Rstudio
+- Install quarto
+
+# Power really is....
+
+$$
+P(p-value < p_{critical} | H_0 = False)
+$$
+
+$$
+\mbox{p-value} \equiv P(Result | H_0)
+$$
+
+
+
+

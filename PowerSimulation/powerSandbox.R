@@ -208,3 +208,41 @@ hist(rbeta(100000,100,1)*10)
 #right skewness 
 hist(rbeta(100000,1,100)*10)
 
+
+### Simpr vignette
+library(simpr)
+
+#set.seed(100)
+Output <- ## Specify the simulation
+  specify(x1 = ~ 2 + rnorm(n),
+          x2 = ~ 3 + 2*x1 + rnorm(n, 0, sd = 0.5),
+          y = ~ 5 + x1 + x2 + g1*x1*x2 + 10 * rnorm(n)) %>%
+  ## Define varying parameters: here, sample size and effect size
+  define(n = seq(100, 300, by = 50),
+         g1 = seq(-1, 1, by = 0.25)) %>% 
+  ## Generate 10 repetitions
+  generate(10) %>% 
+  ## Fit models
+  fit(lm = ~lm(y ~ x1*x2)) %>% 
+  ## Tidy each simulation using broom::tidy and
+  ## bind together
+  tidy_fits
+
+simpr_tidy
+
+str(simpr_tidy)
+
+library(dplyr)
+
+simpr_tidy %>% dplyr::filter(term %in% c("x1","x2","x1:x2")) %>%
+  group_by(n, term, g1) %>%
+  summarize(power = mean(p.value < 0.05)) 
+
+condition_power
+
+library(ggplot2)
+
+condition_power %>% 
+  ggplot(aes(n, power)) +
+  geom_line(aes(color=term)) +
+  facet_grid(~g1)

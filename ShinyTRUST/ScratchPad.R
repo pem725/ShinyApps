@@ -20,9 +20,16 @@ exp(1)
 log(3, base=2)
 log(-5)
 
-m1 <- glmer()
+m1 <- glm(B ~ T, family= data=dat)
+summary(m1)
+exp(coef(m1))
+
+plot(dat$T,predict(m1,type = "response"))
 
 
 dat$gu1r <- dat$G*dat$U1*dat$R
 
 aggregate(dat$gu1r, by=list(dat$scen), mean)
+
+
+
