@@ -1,49 +1,78 @@
 ---
 title: "Power to the People!"
-author: "Patrick E. and Simone C. McKnight"
+author: 
+  - name: Patrick E. McKnight
+    id: pem
+    orcid: 0000-0002-9067-9066
+    email: pmcknigh@gmu.edu
+    affiliation: 
+      - name: George Mason University
+        department:  Department of Psychology
+        address: Fairfax, VA
+        url: https://www.mres-gmu.org
+  - name: Simone C. McKnight
+    id: scm
+    email: scmcknight714@gmail.com
+    affiliation:
+      - name: GST & Google
+        url: https://www.mres-gmu.org
+  - name: MRES
+    affiliation:
+      - name: Where MRES get solved
+        url: https://www.mres-gmu.org
 format: 
   revealjs:
     incremental: true
-
+css: style.css
+#title-block-banner: www/MRES2wbg.png
+#title-block-banner: true
 ---
 
----
+
+![Fuzzy Power](www/DALL·E%202023-11-09%2019.26.11%20-%20impressionist%20water%20color%20of%20a%20man%20walking%20on%20the%20beach%20with%20a%20metal%20detector.png)
+
+------------------------------------------------------------------------
+
+![Less fuzzy power](www/DALL·E%202023-11-09%2019.43.45%20-%20pencil%20and%20water%20color%20of%20a%20man%20in%20shorts%20with%20a%20floppy%20hat%20walking%20on%20the%20beach%20with%20a%20metal%20detector.png)
+
+------------------------------------------------------------------------
+
+![If it is there, we will find it.](www/Robot-Minesweeper-Invented-by-University-of-Coimbra-420496-2.jpg)
 
 # Statistical Power
 
 $$
 P(\mbox{Party at the Pub! | Your Research Plans}) = \mbox{SWAG}
-$$
-Reads...
+$$ Reads...
 
 > "the probability ($P()$) that you will $\mbox{Party at the Pub!}$ given ($\mbox{" | "}$) your plans to collect and analyze the data equals ($=$) a SWAG (or **S**cientific **W**ild **A**ss **G**uess)."
 
-
----
+------------------------------------------------------------------------
 
 ![](https://permaculturevisions.com/wp-content/uploads/2016/11/self-sufficiency-vs-self-reliance-e1478951707569.jpg)
 
 # Power Estimation toward Self-Reliance
 
-- Daunting (seemingly complex and unavailable)
-- Important (your success depends upon it)
-- Error Prone (easy to mislead yourself)
-- More available than commonly known (via simulation)
+-   Daunting (seemingly complex and unavailable)
+-   Important (your success depends upon it)
+-   Error Prone (easy to mislead yourself)
+-   More available than commonly known (via simulation)
 
-# What you will learn today
+# Learning Objectives
 
-1. Power essentials
-2. Why and how to compute power
-3. Methods to simulate
-4. Resources to make you even more self-reliant
+1.  Power essentials
+2.  Why and how to compute power
+3.  Methods to simulate
+4.  Resources to make you even more self-reliant
 
 # Housekeeping
 
-- Install R
-- Install Rstudio
-- Install quarto
+-   Install R
+-   Install Rstudio
+-   Install quarto
+-   On a lark...install git? Just kidding (sorta)
 
-# Power really is....
+# Power Essentials
 
 $$
 P(p-value < p_{critical} | H_0 = False)
@@ -53,6 +82,66 @@ $$
 \mbox{p-value} \equiv P(Result | H_0)
 $$
 
+# Why Compute Power?
+
+1.  Funding and your future success.
+2.  Learn to control what you can control.
+3.  Avoid wasting time.
+4.  More efficient use of scarce resources.
+
+# Simulation Methods
+
+Many to choose from but there are three basic types:
+
+1.  Generate Data (raw values)
+2.  Generate Statistic (from parameters)
+3.  Iterate on either (do many times)
+
+## Method 1: Data Generative Simulation
+
+Step 1: Generate Data $\Rightarrow$
+
+Step 2: Run Model $\Rightarrow$
+
+Step 3: Collect Results $\Rightarrow$
+
+Step 4: Repeat (optional)
+
+## Method 2: Statistic Generative Simulation
+
+Step 1: Generate Statistic $\Rightarrow$
+
+Step 2: Compute Probability $\Rightarrow$
+
+Step 3: Collect Results $\Rightarrow$
+
+Step 4: Repeat (optional)
 
 
+## Recommended Method
 
+Use something that exists FIRST!
+
+# Resources
+
+## Online Calculators
+<https://sammancuso.shinyapps.io/power/>
+<https://debruine.github.io/lmem_sim/index.html>
+<https://shiny.psy.gla.ac.uk/lmem_sim/>
+<https://shiny.psy.gla.ac.uk/Dale/crossed/>
+<https://shiny.ieis.tue.nl/anova_power/>
+<https://arcaldwell49.shinyapps.io/anova-exact/>
+<https://schoemanna.shinyapps.io/mc_power_med/>
+<https://designingexperiments.com/shiny-r-web-apps/>
+<https://aaron0696.shinyapps.io/BtwnANOVAPowSim/>
+
+## Free Books/Articles (*GMU auth req'd)
+<https://aaroncaldwell.us/SuperpowerBook/>
+
+[Simulation-Based Power Analysis for Factorial Designs*](https://journals-sagepub-com.mutex.gmu.edu/doi/10.1177/2515245920951503)
+
+[An article for an app*](https://journals-sagepub-com.mutex.gmu.edu/doi/full/10.1177/2515245920978738)
+
+## Git Resources
+
+<https://github.com/arcaldwell49/Superpower>

@@ -315,6 +315,17 @@ Computing statistical power only involves a few decisions for N and d; the signi
 
 We made all these estimates above with such confidence that I forgot to mention that we never know any of these values when planning our research.  None of them.  We guess.  We guess in our favor; we guess with gusto; and we guess poorly more often than not.  Why?  Simply put, we invest too much time trying to get some point estimates of completely wild guesses.  By busying ourselves with these micro-fine estimates, we forget that we guessed **EVERY PART OF THE EQUATION**.  Think about the situation carefully before you reflexively disagree.  
 
+Consider Lehr's "rule of thumb" estimate (Van Belle, 2008) for a two-sided t-test, 80\% power, and a critical alpha level of .05 leads to:
+
+$$
+n = 16 \frac{s^2}{d^2}
+$$
+where $n$ is the sample size necessary to achieve 80\% power for a population variance of $s^2$ and a $d$ equal to the difference between the means.  The wikipedia entry at least cautions readers to conduct their own power analyses instead of relying on these estimates.  I suggest that you always run this simple test to develop a level of numeracy that few others possess.  
+
+Guesses happen at every level but we ought to have a better grasp of what makes statistical power tick for **our** study and **our** future efforts.
+
+
+
 ------------------------------------------------------------------------
 
 **THOUGHT EXERCISE**
@@ -451,6 +462,7 @@ plotOutput("p2")
 #| context: server
 #| echo: true
 library(tidyverse)
+library(psych)
 
   genDat2 <- reactive({
       data.frame(grp=as.factor(c(rep(1,input$N1),rep(2,input$N2))), 
@@ -469,7 +481,16 @@ library(tidyverse)
       summarize(x=mean(x))
   })
 
-
+  CohenD <- reactive({
+    abs(round(cohen.d(x~grp, data=genDat2())$cohen.d[2],2))
+  })
+  
+  powerEst2 <- reactive({
+    round(pwr.t.test(n = input$N1 + input$N2, 
+                     d= CohenD(),
+                     type = "two.sample",
+                     alternative = "two.sided")$power,2)
+  })
   
   output$p2 <- renderPlot({
       # draw the histogram with the specified number of bins
@@ -487,7 +508,8 @@ library(tidyverse)
         #               xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
         #               ymin=0, ymax = Inf), 
         #           alpha = .01, fill = "pink") + 
-      theme_xkcd()
+      theme_xkcd() +
+      labs(title = paste("Power = ", powerEst2(), sep=""))
   })
 ```
 
@@ -496,7 +518,7 @@ library(tidyverse)
 
 ```{r}
 library(simpr)
-set.seed(100)
+#set.seed(100)
 simpr_tidy = ## Specify the simulation
   specify(x1 = ~ 2 + rnorm(n),
                        x2 = ~ 3 + 2*x1 + rnorm(n, 0, sd = 0.5),
@@ -707,11 +729,14 @@ summary(out)
 ```
 
 
+
 ## Structural Equations Modeling
 
 [TRY THIS](https://yilinandrewang.shinyapps.io/pwrSEM/){target="_blank"}
 
 # Where can I go for more help?
 
-
+1. Read the fine materials available
+2. GitHub CoPilot (coming to an IDE near you in 12/2023)
+3. 
 
