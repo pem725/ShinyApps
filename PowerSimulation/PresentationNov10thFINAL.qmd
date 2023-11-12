@@ -23,11 +23,26 @@ author:
 format: 
   revealjs:
     incremental: true
+    menu: 
+      side: left
+      width: narrow
 css: style.css
 #title-block-banner: www/MRES2wbg.png
 #title-block-banner: true
 ---
 
+# {auto-animate=true}
+
+::: {style="margin=top; 100px;"}
+The Power to Detect
+:::
+
+# {auto-animate=true}
+::: {style="margin-top: 300px; font-size: 3em; color: red;"}
+The Power to Detect
+:::
+
+---
 
 ![Fuzzy Power](www/DALL·E%202023-11-09%2019.26.11%20-%20impressionist%20water%20color%20of%20a%20man%20walking%20on%20the%20beach%20with%20a%20metal%20detector.png)
 

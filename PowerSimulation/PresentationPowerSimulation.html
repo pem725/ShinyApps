@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-1.3.353">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Patrick E. McKnight">
 <meta name="author" content="Simone C. McKnight">
-<meta name="dcterms.date" content="2023-11-09">
+<meta name="dcterms.date" content="2023-11-10">
 <meta name="keywords" content="Statistical Power, Simulation, R/shiny">
 
 <title>Simulating data to estimate power</title>
@@ -21,9 +21,10 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -50,43 +51,13 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -101,6 +72,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link href="PresentationPowerSimulation_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="PresentationPowerSimulation_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
@@ -120,7 +92,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div class="quarto-title-meta-heading">Affiliations</div>
     
       <div class="quarto-title-meta-contents">
-      Patrick E. McKnight <a href="https://orcid.org/0000-0002-9067-9066" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a>
+      <p class="author">Patrick E. McKnight <a href="https://orcid.org/0000-0002-9067-9066" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
     </div>
       <div class="quarto-title-meta-contents">
           <p class="affiliation">
@@ -130,7 +102,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             </p>
         </div>
         <div class="quarto-title-meta-contents">
-      Simone C. McKnight 
+      <p class="author">Simone C. McKnight </p>
     </div>
       <div class="quarto-title-meta-contents">
           <p class="affiliation">
@@ -147,7 +119,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 9, 2023</p>
+        <p class="date">November 10, 2023</p>
       </div>
     </div>
     
@@ -381,9 +353,6 @@ d = \frac{\bar{X_1} - \bar{X_2}}{s_p} = \frac{\mbox{Difference Between Groups}}{
 </div>
 </div>
 </div>
-<div class="cell" data-context="server">
-
-</div>
 <p>Now that you have the hang of it. Let’s dive a little deeper into the details so you can be a bit more informed about which values to choose, when, and why. Here goes…</p>
 </section>
 <section id="whats-the-effect" class="level3">
@@ -416,6 +385,10 @@ z = \frac{x_i - \bar{X}}{s}
 <section id="why-are-point-estimates-of-statistical-power-of-limited-use" class="level1">
 <h1>Why are point estimates of statistical power of limited use?</h1>
 <p>We made all these estimates above with such confidence that I forgot to mention that we never know any of these values when planning our research. None of them. We guess. We guess in our favor; we guess with gusto; and we guess poorly more often than not. Why? Simply put, we invest too much time trying to get some point estimates of completely wild guesses. By busying ourselves with these micro-fine estimates, we forget that we guessed <strong>EVERY PART OF THE EQUATION</strong>. Think about the situation carefully before you reflexively disagree.</p>
+<p>Consider Lehr’s “rule of thumb” estimate (Van Belle, 2008) for a two-sided t-test, 80% power, and a critical alpha level of .05 leads to:</p>
+<p><span class="math display">\[
+n = 16 \frac{s^2}{d^2}
+\]</span> where <span class="math inline">\(n\)</span> is the sample size necessary to achieve 80% power</p>
 <hr>
 <p><strong>THOUGHT EXERCISE</strong></p>
 <blockquote class="blockquote">
@@ -478,9 +451,6 @@ z = \frac{x_i - \bar{X}}{s}
 </div>
 </div>
 </div>
-</div>
-<div class="cell" data-context="server">
-
 </div>
 </section>
 <section id="multi-mean-playground" class="level3">
@@ -554,9 +524,6 @@ z = \frac{x_i - \bar{X}}{s}
 </div>
 </div>
 </div>
-<div class="cell" data-context="server">
-
-</div>
 </section>
 </section>
 <section id="regression-anyone" class="level2">
@@ -565,7 +532,7 @@ z = \frac{x_i - \bar{X}}{s}
 <details>
 <summary>Show the Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simpr)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#set.seed(100)</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>simpr_tidy <span class="ot">=</span> <span class="do">## Specify the simulation</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">specify</span>(<span class="at">x1 =</span> <span class="sc">~</span> <span class="dv">2</span> <span class="sc">+</span> <span class="fu">rnorm</span>(n),</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">x2 =</span> <span class="sc">~</span> <span class="dv">3</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>x1 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.5</span>),</span>
@@ -586,16 +553,16 @@ z = \frac{x_i - \bar{X}}{s}
 <pre><code># A tibble: 1,000 × 10
    .sim_id     n    g1   rep Source term    estimate std.error statistic p.value
      &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
- 1       1   100    -1     1 lm     (Inter…  -2.32       7.37   -0.314   7.54e-1
- 2       1   100    -1     1 lm     x1       -0.953      4.93   -0.193   8.47e-1
- 3       1   100    -1     1 lm     x2        2.46       2.07    1.18    2.39e-1
- 4       1   100    -1     1 lm     x1:x2    -0.921      0.372  -2.47    1.51e-2
- 5       2   150    -1     1 lm     (Inter…   7.23       5.31    1.36    1.75e-1
- 6       2   150    -1     1 lm     x1        3.13       3.80    0.824   4.11e-1
- 7       2   150    -1     1 lm     x2       -0.0135     1.57   -0.00861 9.93e-1
- 8       2   150    -1     1 lm     x1:x2    -0.982      0.256  -3.84    1.86e-4
- 9       3   200    -1     1 lm     (Inter…  16.4        5.55    2.96    3.43e-3
-10       3   200    -1     1 lm     x1       -0.647      3.94   -0.164   8.70e-1
+ 1       1   100    -1     1 lm     (Inter…    11.0      8.24      1.33  1.87e-1
+ 2       1   100    -1     1 lm     x1         11.0      4.51      2.44  1.67e-2
+ 3       1   100    -1     1 lm     x2         -1.24     2.21     -0.562 5.75e-1
+ 4       1   100    -1     1 lm     x1:x2      -1.53     0.307    -4.99  2.69e-6
+ 5       2   150    -1     1 lm     (Inter…    -1.17     5.72     -0.204 8.38e-1
+ 6       2   150    -1     1 lm     x1          3.13     3.85      0.812 4.18e-1
+ 7       2   150    -1     1 lm     x2          2.26     1.67      1.36  1.77e-1
+ 8       2   150    -1     1 lm     x1:x2      -1.38     0.254    -5.42  2.40e-7
+ 9       3   200    -1     1 lm     (Inter…     5.98     5.37      1.11  2.67e-1
+10       3   200    -1     1 lm     x1         -2.12     3.28     -0.648 5.18e-1
 # ℹ 990 more rows</code></pre>
 </div>
 <details>
@@ -620,30 +587,30 @@ argument.</code></pre>
 # Groups:   n [5]
        n    g1 power
    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
- 1   100  -1     0.7
- 2   100  -0.5   0.3
+ 1   100  -1     0.6
+ 2   100  -0.5   0.4
  3   100   0     0  
- 4   100   0.5   0.4
- 5   100   1     0.5
- 6   150  -1     1  
+ 4   100   0.5   0.2
+ 5   100   1     0.7
+ 6   150  -1     0.8
  7   150  -0.5   0.4
  8   150   0     0  
  9   150   0.5   0.4
-10   150   1     1  
-11   200  -1     0.9
-12   200  -0.5   0.2
-13   200   0     0.1
-14   200   0.5   0.7
-15   200   1     0.9
+10   150   1     0.9
+11   200  -1     1  
+12   200  -0.5   0.5
+13   200   0     0  
+14   200   0.5   0.3
+15   200   1     1  
 16   250  -1     1  
-17   250  -0.5   0.3
+17   250  -0.5   0.7
 18   250   0     0  
-19   250   0.5   0.7
+19   250   0.5   0.6
 20   250   1     1  
 21   300  -1     1  
-22   300  -0.5   0.5
-23   300   0     0  
-24   300   0.5   0.7
+22   300  -0.5   0.7
+23   300   0     0.2
+24   300   0.5   0.6
 25   300   1     1  </code></pre>
 </div>
 <details>
@@ -668,9 +635,6 @@ argument.</code></pre>
 
 </div>
 </div>
-</div>
-<div class="cell" data-context="server">
-
 </div>
 </section>
 <section id="anova-models" class="level2">
@@ -700,11 +664,11 @@ Attaching package: 'psych'</code></pre>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">describe</span>(data.df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>     vars  n mean   sd median trimmed  mad   min max range  skew kurtosis   se
-IV1*    1 16 1.50 0.52   1.50    1.50 0.74  1.00   2  1.00  0.00    -2.12 0.13
-IV2*    2 16 1.50 0.52   1.50    1.50 0.74  1.00   2  1.00  0.00    -2.12 0.13
-IV3*    3 16 1.50 0.52   1.50    1.50 0.74  1.00   2  1.00  0.00    -2.12 0.13
-DV      4 16 0.05 1.24  -0.03    0.06 1.27 -2.07   2  4.07 -0.07    -1.33 0.31</code></pre>
+<pre><code>     vars  n  mean   sd median trimmed  mad  min  max range  skew kurtosis   se
+IV1*    1 16  1.50 0.52   1.50    1.50 0.74  1.0 2.00  1.00  0.00    -2.12 0.13
+IV2*    2 16  1.50 0.52   1.50    1.50 0.74  1.0 2.00  1.00  0.00    -2.12 0.13
+IV3*    3 16  1.50 0.52   1.50    1.50 0.74  1.0 2.00  1.00  0.00    -2.12 0.13
+DV      4 16 -0.56 1.52  -0.14   -0.48 1.23 -3.6 1.37  4.97 -0.56    -1.08 0.38</code></pre>
 </div>
 <details>
 <summary>Show the Code</summary>
@@ -725,39 +689,39 @@ lm(formula = DV ~ IV1 * IV2 * IV3, data = data.df)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--0.3953 -0.2251  0.0000  0.2251  0.3953 
+-1.3127 -0.3635  0.0000  0.3635  1.3127 
 
 Coefficients:
-               Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)     -0.6290     0.2747  -2.290 0.051277 .  
-IV11             0.1811     0.3885   0.466 0.653456    
-IV21             1.5739     0.3885   4.051 0.003677 ** 
-IV31            -1.2316     0.3885  -3.170 0.013191 *  
-IV11:IV21       -0.6535     0.5494  -1.189 0.268356    
-IV11:IV31        2.8719     0.5494   5.227 0.000796 ***
-IV21:IV31       -0.7923     0.5494  -1.442 0.187245    
-IV11:IV21:IV31   0.4623     0.7770   0.595 0.568303    
+               Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)    -2.58573    0.70607  -3.662  0.00638 **
+IV11            2.49781    0.99853   2.501  0.03686 * 
+IV21            2.73403    0.99853   2.738  0.02553 * 
+IV31            0.29791    0.99853   0.298  0.77304   
+IV11:IV21      -1.62291    1.41213  -1.149  0.28364   
+IV11:IV31       0.06105    1.41213   0.043  0.96658   
+IV21:IV31      -2.04374    1.41213  -1.447  0.18584   
+IV11:IV21:IV31  1.26742    1.99705   0.635  0.54338   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.3885 on 8 degrees of freedom
-Multiple R-squared:  0.9476,    Adjusted R-squared:  0.9018 
-F-statistic: 20.67 on 7 and 8 DF,  p-value: 0.0001587</code></pre>
+Residual standard error: 0.9985 on 8 degrees of freedom
+Multiple R-squared:  0.7712,    Adjusted R-squared:  0.5711 
+F-statistic: 3.853 on 7 and 8 DF,  p-value: 0.03891</code></pre>
 </div>
 <details>
 <summary>Show the Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">aov</span>(DV<span class="sc">~</span>IV1<span class="sc">*</span>IV2<span class="sc">*</span>IV3,<span class="at">data=</span>data.df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
-IV1          1  7.906   7.906  52.386 8.91e-05 ***
-IV2          1  3.737   3.737  24.762  0.00108 ** 
-IV3          1  0.023   0.023   0.154  0.70497    
-IV1:IV2      1  0.178   0.178   1.182  0.30862    
-IV1:IV3      1  9.629   9.629  63.799 4.42e-05 ***
-IV2:IV3      1  0.315   0.315   2.087  0.18660    
-IV1:IV2:IV3  1  0.053   0.053   0.354  0.56830    
-Residuals    8  1.207   0.151                     
+<pre><code>            Df Sum Sq Mean Sq F value  Pr(&gt;F)   
+IV1          1 16.544  16.544  16.593 0.00357 **
+IV2          1  5.930   5.930   5.947 0.04065 * 
+IV3          1  0.567   0.567   0.569 0.47231   
+IV1:IV2      1  0.979   0.979   0.981 0.35086   
+IV1:IV3      1  0.483   0.483   0.484 0.50627   
+IV2:IV3      1  1.988   1.988   1.994 0.19561   
+IV1:IV2:IV3  1  0.402   0.402   0.403 0.54338   
+Residuals    8  7.976   0.997                   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
@@ -1048,6 +1012,11 @@ Xn 0.000 </code></pre>
 </section>
 <section id="where-can-i-go-for-more-help" class="level1">
 <h1>Where can I go for more help?</h1>
+<ol type="1">
+<li>Read the fine materials available</li>
+<li>GitHub CoPilot (coming to an IDE near you in 12/2023)</li>
+<li></li>
+</ol>
 <p>
 <script type="application/shiny-prerendered" data-context="server">
   output$pP1 <- renderPlot({
@@ -1124,6 +1093,7 @@ library(pwr)
  
 <script type="application/shiny-prerendered" data-context="server">
 library(tidyverse)
+library(psych)
 
   genDat2 <- reactive({
       data.frame(grp=as.factor(c(rep(1,input$N1),rep(2,input$N2))), 
@@ -1142,7 +1112,16 @@ library(tidyverse)
       summarize(x=mean(x))
   })
 
-
+  CohenD <- reactive({
+    abs(round(cohen.d(x~grp, data=genDat2())$cohen.d[2],2))
+  })
+  
+  powerEst2 <- reactive({
+    round(pwr.t.test(n = input$N1 + input$N2, 
+                     d= CohenD(),
+                     type = "two.sample",
+                     alternative = "two.sided")$power,2)
+  })
   
   output$p2 <- renderPlot({
       # draw the histogram with the specified number of bins
@@ -1160,7 +1139,8 @@ library(tidyverse)
         #               xmax = (mean(x) + 1.97*sd(x)/sqrt(length(x))),
         #               ymin=0, ymax = Inf), 
         #           alpha = .01, fill = "pink") + 
-      theme_xkcd()
+      theme_xkcd() +
+      labs(title = paste("Power = ", powerEst2(), sep=""))
   })
 </script>
  
@@ -1247,7 +1227,7 @@ ojs_define <- function(..., .session = shiny::getDefaultReactiveDomain()) {
 <!--/html_preserve-->
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section></div></main>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -1276,9 +1256,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -1343,6 +1337,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {

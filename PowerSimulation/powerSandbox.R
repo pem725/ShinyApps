@@ -246,3 +246,35 @@ condition_power %>%
   ggplot(aes(n, power)) +
   geom_line(aes(color=term)) +
   facet_grid(~g1)
+
+
+df.ex <- data.frame(grp=as.factor(c(rep(1,40,1),rep(2,50,4))), 
+             x=c(rnorm(40, 2), rnorm(50, 1)))
+
+cohen.d(x~grp, data=df.ex)$cohen.d[2]
+
+powerEst2 <- reactive({
+  round(pwr.t.test(n = input$N1 + input$N2, 
+                   d= CohenD(),
+                   type = "two.sample",
+                   alternative = "two.sided")$power,2)
+})
+
+
+sumstats <- reactive({
+  genDat2() %>%
+    group_by(grp) %>%
+    summarize(x=mean(x))
+})
+
+CohenD <- reactive({
+  abs(round(cohen.d(x~grp, data=genDat2())$d,2))
+})
+
+powerEst2 <- reactive({
+  round(pwr.t.test(n = input$N1 + input$N2, 
+                   d= CohenD(),
+                   type = "two.sample",
+                   alternative = "two.sided")$power,2)
+})
+
