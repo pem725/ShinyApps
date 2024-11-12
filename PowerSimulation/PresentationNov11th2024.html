@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="PresentationNov10thFINAL_files/libs/clipboard/clipboard.min.js"></script>
-<script src="PresentationNov10thFINAL_files/libs/quarto-html/tabby.min.js"></script>
-<script src="PresentationNov10thFINAL_files/libs/quarto-html/popper.min.js"></script>
-<script src="PresentationNov10thFINAL_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="PresentationNov10thFINAL_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="PresentationNov10thFINAL_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="PresentationNov10thFINAL_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
-<link href="PresentationNov10thFINAL_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="PresentationNov11th2024_files/libs/clipboard/clipboard.min.js"></script>
+<script src="PresentationNov11th2024_files/libs/quarto-html/tabby.min.js"></script>
+<script src="PresentationNov11th2024_files/libs/quarto-html/popper.min.js"></script>
+<script src="PresentationNov11th2024_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="PresentationNov11th2024_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="PresentationNov11th2024_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="PresentationNov11th2024_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="PresentationNov11th2024_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.5.43">
 
   <meta name="author" content="Patrick E. McKnight">
@@ -17,8 +17,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="PresentationNov10thFINAL_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="PresentationNov10thFINAL_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="PresentationNov11th2024_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="PresentationNov11th2024_files/libs/revealjs/dist/reveal.css">
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -97,12 +97,12 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="PresentationNov10thFINAL_files/libs/revealjs/dist/theme/quarto.css">
+  <link rel="stylesheet" href="PresentationNov11th2024_files/libs/revealjs/dist/theme/quarto.css">
   <link rel="stylesheet" href="style.css">
-  <link href="PresentationNov10thFINAL_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="PresentationNov10thFINAL_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="PresentationNov10thFINAL_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="PresentationNov10thFINAL_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="PresentationNov11th2024_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="PresentationNov11th2024_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="PresentationNov11th2024_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="PresentationNov11th2024_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
 
   .callout {
@@ -419,7 +419,7 @@ Simone C. McKnight
 </div>
         <p class="quarto-title-affiliation">
             <a href="https://www.mres-gmu.org">
-            GST &amp; Google
+            TSA &amp; Google
             </a>
           </p>
     </div>
@@ -496,24 +496,76 @@ P(\mbox{Party at the Pub! | Your Research Plans}) = \mbox{SWAG}
 </ol>
 </section>
 
-<section id="housekeeping" class="title-slide slide level1 center">
-<h1>Housekeeping</h1>
-<ul>
-<li class="fragment">Install R</li>
-<li class="fragment">Install Rstudio</li>
-<li class="fragment">Install quarto</li>
-<li class="fragment">On a lark…install git? Just kidding (sorta)</li>
-</ul>
-</section>
-
 <section id="power-essentials" class="title-slide slide level1 center">
 <h1>Power Essentials</h1>
+<p>Power is defined as the probability that the p-value observed will be lower than the critical alpha value (<span class="math inline">\(\alpha_{crit}\)</span>) GIVEN (“<span class="math inline">\(|\)</span>”) the null hypothesis (<span class="math inline">\(H_0\)</span>) is false (<span class="math inline">\(\neg H_0\)</span>) or:</p>
 <p><span class="math display">\[
-P(p-value &lt; p_{critical} | H_0 = False)
-\]</span></p>
+\mbox{Power} \equiv P(p &lt; \alpha_{crit} | \neg H_0)
+\]</span> where…</p>
 <p><span class="math display">\[
-\mbox{p-value} \equiv P(Result | H_0)
+\mbox{p} \equiv P(\mbox{Result} | H_0)
 \]</span></p>
+</section>
+
+<section id="probability" class="title-slide slide level1 center">
+<h1>Probability?</h1>
+<p>A ratio of a specific outcome to all possible outcomes.</p>
+<p><span class="math display">\[\mbox{Probability} = P(\theta_i) = \frac{\mbox{Specific Outcome } (\theta_i)}{\mbox{All Possible Outcomes } (\theta)}\]</span> where <span class="math inline">\(\theta_i\)</span> is a specific outcome and <span class="math inline">\(\theta\)</span> is the set of all possible outcomes.</p>
+</section>
+
+<section id="probability-in-nhst" class="title-slide slide level1 center">
+<h1>Probability in NHST</h1>
+<p>For NHST, we have a conditional probability. Subset the world where <span class="math inline">\(H_0\)</span> is true, where we subset based upon what is given (e.g., the null hypothesis is true). So, we first select only those hypothetical cases in which the null being true exists and then we compute the probability of observing the results we did over all the other alternative results.</p>
+<p><span class="math display">\[P(\mbox{Result} | H_0) = \frac{P(\mbox{Result} \cap H_0)}{P(H_0)}\]</span></p>
+</section>
+
+<section id="power-a-conditional-probability-of-a-conditional-probability" class="title-slide slide level1 center">
+<h1>Power: A Conditional Probability of A Conditional Probability</h1>
+<p><span class="math display">\[\mbox{Power} = P(p &lt; \alpha_{crit} | \neg H_0) = \frac{P(p &lt; \alpha_{crit} \cap \neg H_0)}{P(\neg H_0)}\]</span> where <span class="math inline">\(p\)</span> is that NHST conditional probability. Ain’t that a breeze?</p>
+</section>
+
+<section id="an-example-drug-trials" class="title-slide slide level1 center">
+<h1>An Example: Drug Trials</h1>
+<ol type="1">
+<li class="fragment"><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\bar{X}_{TX} = \bar{X}_{CTL}\)</span> The drug has no effect.</li>
+<li class="fragment"><span class="math inline">\(H_1\)</span>: <span class="math inline">\(\bar{X}_{TX} \ne \bar{X}_{CTL}\)</span> The drug has an effect.</li>
+<li class="fragment"><span class="math inline">\(\alpha_{crit} \le 0.05\)</span> (standard)</li>
+<li class="fragment">Power: <span class="math inline">\(&gt; 0.80\)</span> (desired)</li>
+</ol>
+<p>For two groups, how many subjects do you need? Well, that depends on the effect size, the variability, and the desired power. Take a moment to reflect on what you know about central tendency, dispersion, and their relationship to power.</p>
+</section>
+
+<section id="whats-in-a-mean" class="title-slide slide level1 center">
+<h1>What’s in a mean?</h1>
+
+<img data-src="PresentationNov11th2024_files/figure-revealjs/WiaM-1.png" width="960" class="r-stretch"></section>
+
+<section id="variance" class="title-slide slide level1 center">
+<h1>Variance</h1>
+<p><span class="math display">\[S_{obs}^2 = S_{true}^2 + S_{error}^2\]</span></p>
+<p>Variance is good is some places. Sometimes, it is the only thing we can control. The more variance between groups, the more likely we can detect a difference. The less variance within groups, the more likely we can detect a difference.</p>
+</section>
+
+<section id="effect-sizes" class="title-slide slide level1 center">
+<h1>Effect Sizes</h1>
+<p>Cohen’s d is one of the more widely used measures of effect size. There are others. I focus on this one because of its simplicity and its wide use. It is defined as the difference between two means divided by the pooled standard deviation.</p>
+<p><span class="math display">\[\mbox{Cohen's d} = \frac{\bar{X}_{TX} - \bar{X}_{CTL}}{S_{pooled}}\]</span></p>
+</section>
+
+<section id="where" class="title-slide slide level1 center">
+<h1>where…</h1>
+<p><span class="math display">\[S_{pooled} = \sqrt{\frac{(n_{TX} - 1)S_{TX}^2 + (n_{CTL} - 1)S_{CTL}^2}{n_{TX} + n_{CTL} - 2}}\]</span></p>
+</section>
+
+<section id="sample-size" class="title-slide slide level1 center">
+<h1>Sample Size</h1>
+<p>Many novice researchers begin with this question: “How many subjects do I need?” Today, I am going to show you how to answer that question but, more importantly, show you why that question is so limiting. Bear with me.</p>
+<ol type="1">
+<li class="fragment">Big N GOOD; small N BAD.</li>
+<li class="fragment">Law of Large Numbers: As <span class="math inline">\(N \rightarrow \infty\)</span>: <span class="math inline">\(\bar{X} \rightarrow \mu\)</span> and <span class="math inline">\(S \rightarrow \sigma\)</span>.</li>
+<li class="fragment">Sample size is purported to be the most important factor in power estimation.</li>
+<li class="fragment">Sample size is (arguably) the most controllable factor in power estimation.</li>
+</ol>
 </section>
 
 <section id="why-compute-power" class="title-slide slide level1 center">
@@ -526,6 +578,35 @@ P(p-value &lt; p_{critical} | H_0 = False)
 </ol>
 </section>
 
+<section id="how-to-compute-power" class="title-slide slide level1 center">
+<h1>How to Compute Power</h1>
+<ol type="1">
+<li class="fragment">Rough estimates using rules of thumb</li>
+<li class="fragment">Point estimates from code or online calculators</li>
+<li class="fragment">Simulation-based methods</li>
+<li class="fragment">Bayesian methods (not really NHST)</li>
+</ol>
+</section>
+
+<section id="rough-estimates" class="title-slide slide level1 center">
+<h1>Rough Estimates</h1>
+<ol type="1">
+<li class="fragment">Measures of difference: Group sizes of <span class="math inline">\(n = 30\)</span> for <span class="math inline">\(80\%\)</span> power; if smaller, no fewer than 7 per cell.</li>
+<li class="fragment">Measures of association (r): <span class="math inline">\(N &gt; 50\)</span> observations for <span class="math inline">\(80\%\)</span> power.</li>
+<li class="fragment">Measurement Models (EFA, CFA): <span class="math inline">\(N &gt; 300\)</span> usually fine.</li>
+</ol>
+</section>
+
+<section id="point-estimates" class="title-slide slide level1 center">
+<h1>Point Estimates</h1>
+<ol type="1">
+<li class="fragment">Get your numbers in order (effect size, alpha, sample size, etc.)</li>
+<li class="fragment">Use a function or online calculator (see resources)</li>
+<li class="fragment">The power for our data presented above is <strong>0.48 %</strong></li>
+<li class="fragment">Record the observed power and report.</li>
+</ol>
+</section>
+
 <section>
 <section id="simulation-methods" class="title-slide slide level1 center">
 <h1>Simulation Methods</h1>
@@ -535,54 +616,62 @@ P(p-value &lt; p_{critical} | H_0 = False)
 <li class="fragment">Generate Statistic (from parameters) - Method 2</li>
 <li class="fragment">Iterate on either (do many times) - Method 3</li>
 </ol>
+<p>I plan to discuss 1 &amp; 3 below…</p>
 </section>
 <section id="method-1-data-generative-simulation" class="slide level2">
 <h2>Method 1: Data Generative Simulation</h2>
-<h3 id="step-1-generate-data-rightarrow">Step 1: Generate Data <span class="math inline">\(\Rightarrow\)</span></h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="co"># generate random data for a two-group t-test given a specific effect size and expected standard deviations</span></span>
-<span id="cb1-2"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-3"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb1-4"><a href=""></a>mu1 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb1-5"><a href=""></a>mu2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb1-6"><a href=""></a>sd1 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1-7"><a href=""></a>sd2 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1-8"><a href=""></a>group1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, mu1, sd1)</span>
-<span id="cb1-9"><a href=""></a>group2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, mu2, sd2)</span>
-<span id="cb1-10"><a href=""></a><span class="fu">t.test</span>(group1, group2)</span>
-<span id="cb1-11"><a href=""></a></span>
-<span id="cb1-12"><a href=""></a><span class="co"># do the same thing above but using tidyverse</span></span>
-<span id="cb1-13"><a href=""></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-14"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-15"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb1-16"><a href=""></a>mu1 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb1-17"><a href=""></a>mu2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb1-18"><a href=""></a>sd1 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1-19"><a href=""></a>sd2 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1-20"><a href=""></a>group1 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">group =</span> <span class="st">"group1"</span>, <span class="at">value =</span> <span class="fu">rnorm</span>(n, mu1, sd1))</span>
-<span id="cb1-21"><a href=""></a>group2 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">group =</span> <span class="st">"group2"</span>, <span class="at">value =</span> <span class="fu">rnorm</span>(n, mu2, sd2))</span>
-<span id="cb1-22"><a href=""></a>data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(group1, group2)</span>
-<span id="cb1-23"><a href=""></a>data <span class="sc">%&gt;%</span> </span>
-<span id="cb1-24"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> group, <span class="at">y =</span> value)) <span class="sc">+</span></span>
-<span id="cb1-25"><a href=""></a>  <span class="fu">geom_boxplot</span>()</span>
-<span id="cb1-26"><a href=""></a></span>
-<span id="cb1-27"><a href=""></a><span class="co"># conduct a t-test</span></span>
-<span id="cb1-28"><a href=""></a><span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data =</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<h3 id="step-2-run-model-rightarrow">Step 2: Run Model <span class="math inline">\(\Rightarrow\)</span></h3>
-<p>Step 3: Collect Results <span class="math inline">\(\Rightarrow\)</span></p>
-<p>Step 4: Repeat (optional)</p>
+<p>Watch each step as they unfold below</p>
 </section>
+<section id="step-1-generate-data-rightarrow" class="slide level2">
+<h2>Step 1: Generate Data <span class="math inline">\(\Rightarrow\)</span></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="co"># Define parameters</span></span>
+<span id="cb1-2"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb1-3"><a href=""></a>mu1 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-4"><a href=""></a>mu2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb1-5"><a href=""></a>sd1 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1-6"><a href=""></a>sd2 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1-7"><a href=""></a></span>
+<span id="cb1-8"><a href=""></a><span class="co"># Generate data for both groups</span></span>
+<span id="cb1-9"><a href=""></a>group1 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">group =</span> <span class="st">"group1"</span>, <span class="at">value =</span> <span class="fu">rnorm</span>(n, mu1, sd1))</span>
+<span id="cb1-10"><a href=""></a>group2 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">group =</span> <span class="st">"group2"</span>, <span class="at">value =</span> <span class="fu">rnorm</span>(n, mu2, sd2))</span>
+<span id="cb1-11"><a href=""></a>data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(group1, group2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-2-run-model-rightarrow" class="slide level2">
+<h2>Step 2: Run Model <span class="math inline">\(\Rightarrow\)</span></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data =</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-3-collect-results-rightarrow" class="slide level2">
+<h2>Step 3: Collect Results <span class="math inline">\(\Rightarrow\)</span></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="co"># Perform a two-sample independent t-test</span></span>
+<span id="cb3-2"><a href=""></a>t_test_result <span class="ot">&lt;-</span> <span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data =</span> data, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-3"><a href=""></a></span>
+<span id="cb3-4"><a href=""></a><span class="fu">names</span>(t_test_result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-4-repeat" class="slide level2">
+<h2>Step 4: Repeat</h2>
+
+<img data-src="PresentationNov11th2024_files/figure-revealjs/M1S4-1.png" width="960" class="r-stretch"></section>
 <section id="method-2-statistic-generative-simulation" class="slide level2">
 <h2>Method 2: Statistic Generative Simulation</h2>
 <p>Step 1: Generate Statistic <span class="math inline">\(\Rightarrow\)</span></p>
 <p>Step 2: Compute Probability <span class="math inline">\(\Rightarrow\)</span></p>
 <p>Step 3: Collect Results <span class="math inline">\(\Rightarrow\)</span></p>
-<p>Step 4: Repeat (optional)</p>
+<p>Step 4: Repeat</p>
 </section>
 <section id="recommended-method" class="slide level2">
 <h2>Recommended Method</h2>
-<p>Use something that exists FIRST!</p>
+<ol type="1">
+<li class="fragment">Use a tool that already exists FIRST!</li>
+<li class="fragment">Learn the model you are trying to use (lm, glm, lmer, etc.)</li>
+<li class="fragment">Use a simulation-based method to evaluate your guesses and estimates.</li>
+<li class="fragment">Lather, rinse, repeat.</li>
+</ol>
 </section></section>
 <section>
 <section id="resources" class="title-slide slide level1 center">
@@ -612,19 +701,19 @@ P(p-value &lt; p_{critical} | H_0 = False)
   </div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="PresentationNov10thFINAL_files/libs/revealjs/plugin/math/math.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="PresentationNov11th2024_files/libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

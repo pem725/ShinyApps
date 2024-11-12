@@ -108,15 +108,57 @@ $$
 
 Many to choose from but there are three basic types:
 
-1.  Generate Data (raw values)
-2.  Generate Statistic (from parameters)
-3.  Iterate on either (do many times)
+1.  Generate Data (raw values) - Method 1
+2.  Generate Statistic (from parameters) - Method 2
+3.  Iterate on either (do many times) - Method 3
 
 ## Method 1: Data Generative Simulation
 
-Step 1: Generate Data $\Rightarrow$
+### Step 1: Generate Data $\Rightarrow$ 
 
-Step 2: Run Model $\Rightarrow$
+```{r M1S1}
+#| echo: true
+#| eval: false
+#| include: true
+#| output: false
+#| message: false
+#| warning: false
+#| error: false
+#| collapse: true
+
+# generate random data for a two-group t-test given a specific effect size and expected standard deviations
+set.seed(123)
+n <- 20
+mu1 <- 0
+mu2 <- 0.5
+sd1 <- 1
+sd2 <- 1
+group1 <- rnorm(n, mu1, sd1)
+group2 <- rnorm(n, mu2, sd2)
+t.test(group1, group2)
+
+# do the same thing above but using tidyverse
+library(tidyverse)
+set.seed(123)
+n <- 20
+mu1 <- 0
+mu2 <- 0.5
+sd1 <- 1
+sd2 <- 1
+group1 <- tibble(group = "group1", value = rnorm(n, mu1, sd1))
+group2 <- tibble(group = "group2", value = rnorm(n, mu2, sd2))
+data <- bind_rows(group1, group2)
+data %>% 
+  ggplot(aes(x = group, y = value)) +
+  geom_boxplot()
+
+# conduct a t-test
+t.test(value ~ group, data = data)
+
+
+```
+
+### Step 2: Run Model $\Rightarrow$
 
 Step 3: Collect Results $\Rightarrow$
 

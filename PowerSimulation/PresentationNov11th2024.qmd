@@ -1,0 +1,418 @@
+---
+title: "Power to the People!"
+author: 
+  - name: Patrick E. McKnight
+    id: pem
+    orcid: 0000-0002-9067-9066
+    email: pmcknigh@gmu.edu
+    affiliation: 
+      - name: George Mason University
+        department:  Department of Psychology
+        address: Fairfax, VA
+        url: https://www.mres-gmu.org
+  - name: Simone C. McKnight
+    id: scm
+    email: scmcknight714@gmail.com
+    affiliation:
+      - name: TSA & Google
+        url: https://www.mres-gmu.org
+  - name: MRES
+    affiliation:
+      - name: Where MRES get solved
+        url: https://www.mres-gmu.org
+format: 
+  revealjs:
+    incremental: true
+    menu: 
+      side: left
+      width: narrow
+css: style.css
+#title-block-banner: www/MRES2wbg.png
+#title-block-banner: true
+---
+
+# {auto-animate=true}
+
+::: {style="margin=top; 100px;"}
+The Power to Detect
+:::
+
+# {auto-animate=true}
+::: {style="margin-top: 300px; font-size: 3em; color: red;"}
+The Power to Detect
+:::
+
+---
+
+![Fuzzy Power](www/DALL·E%202023-11-09%2019.26.11%20-%20impressionist%20water%20color%20of%20a%20man%20walking%20on%20the%20beach%20with%20a%20metal%20detector.png)
+
+------------------------------------------------------------------------
+
+![Less fuzzy power](www/DALL·E%202023-11-09%2019.43.45%20-%20pencil%20and%20water%20color%20of%20a%20man%20in%20shorts%20with%20a%20floppy%20hat%20walking%20on%20the%20beach%20with%20a%20metal%20detector.png)
+
+------------------------------------------------------------------------
+
+![If it is there, we will find it.](www/Robot-Minesweeper-Invented-by-University-of-Coimbra-420496-2.jpg)
+
+# Statistical Power
+
+$$
+P(\mbox{Party at the Pub! | Your Research Plans}) = \mbox{SWAG}
+$$ Reads...
+
+> "the probability ($P()$) that you will $\mbox{Party at the Pub!}$ given ($\mbox{" | "}$) your plans to collect and analyze the data equals ($=$) a SWAG (or **S**cientific **W**ild **A**ss **G**uess)."
+
+------------------------------------------------------------------------
+
+![](https://permaculturevisions.com/wp-content/uploads/2016/11/self-sufficiency-vs-self-reliance-e1478951707569.jpg)
+
+# Power Estimation toward Self-Reliance
+
+-   Daunting (seemingly complex and unavailable)
+-   Important (your success depends upon it)
+-   Error Prone (easy to mislead yourself)
+-   More available than commonly known (via simulation)
+
+# Learning Objectives
+
+1.  Power essentials
+2.  Why and how to compute power
+3.  Methods to simulate
+4.  Resources to make you even more self-reliant
+
+# Power Essentials
+
+Power is defined as the probability that the p-value observed will be lower than the critical alpha value ($\alpha_{crit}$) GIVEN ("$|$") the null hypothesis ($H_0$) is false ($\neg H_0$) or:
+
+$$
+\mbox{Power} \equiv P(p < \alpha_{crit} | \neg H_0)
+$$
+where...
+
+$$
+\mbox{p} \equiv P(\mbox{Result} | H_0)
+$$
+
+# Probability?
+
+A ratio of a specific outcome to all possible outcomes.
+
+$$\mbox{Probability} = P(\theta_i) = \frac{\mbox{Specific Outcome } (\theta_i)}{\mbox{All Possible Outcomes } (\theta)}$$
+where $\theta_i$ is a specific outcome and $\theta$ is the set of all possible outcomes.
+
+# Probability in NHST
+
+For NHST, we have a conditional probability.  Subset the world where $H_0$ is true,  where we subset based upon what is given (e.g., the null hypothesis is true).  So, we first select only those hypothetical cases in which the null being true exists and then we compute the probability of observing the results we did over all the other alternative results.
+
+$$P(\mbox{Result} | H_0) = \frac{P(\mbox{Result} \cap H_0)}{P(H_0)}$$
+
+# Power: A Conditional Probability of A Conditional Probability
+
+$$\mbox{Power} = P(p < \alpha_{crit} | \neg H_0) = \frac{P(p < \alpha_{crit} \cap \neg H_0)}{P(\neg H_0)}$$
+where $p$ is that NHST conditional probability.  Ain't that a breeze?
+
+# An Example:  Drug Trials
+
+1.  $H_0$:  $\bar{X}_{TX} = \bar{X}_{CTL}$ The drug has no effect.
+2.  $H_1$:  $\bar{X}_{TX} \ne \bar{X}_{CTL}$ The drug has an effect.
+3.  $\alpha_{crit} \le 0.05$ (standard)
+4.  Power:  $> 0.80$ (desired)
+
+For two groups, how many subjects do you need?  Well, that depends on the effect size, the variability, and the desired power.  Take a moment to reflect on what you know about central tendency, dispersion, and their relationship to power.
+
+
+# What's in a mean?
+
+```{r WiaM}
+#| echo: false
+#| eval: true
+#| include: true
+#| message: false
+#| warning: false
+#| error: false
+
+# Load necessary libraries
+library(tidyverse)
+library(ggpattern)
+
+# Define parameters
+n <- 30
+mu1 <- 0
+mu2 <- 0.5
+sd1 <- 1
+sd2 <- 1
+
+# Generate data for both groups
+group1 <- tibble(group = "group1", value = rnorm(n, mu1, sd1))
+group2 <- tibble(group = "group2", value = rnorm(n, mu2, sd2))
+data <- bind_rows(group1, group2)
+
+# Calculate group statistics for annotations
+group_stats <- data %>%
+  group_by(group) %>%
+  summarise(mean = mean(value), sd = sd(value))
+
+# Plot
+data %>% 
+  ggplot(aes(x = value, fill = group)) +
+  geom_density(alpha = 0.5) +
+  theme_minimal() +
+  # Add cross-hatched shaded regions for ±1 SD with different patterns
+  geom_rect_pattern(data = group_stats,
+                    aes(xmin = mean - sd, xmax = mean + sd, ymin = 0, ymax = Inf, fill = group, color = group,
+                        pattern_fill = group, pattern = group),
+                    pattern_density = 0.1,  # Controls the spacing of lines in the pattern
+                    pattern_angle = c(45, -45),  # Different angles for each group
+                    pattern_color = "lightgray",  # Color of the cross-hatch lines
+                    alpha = 0.2,  # Transparency of the shaded area
+                    inherit.aes = FALSE, 
+                    size = 0.5) +  # Border thickness
+  # Add vertical lines for means
+  geom_vline(data = group_stats, aes(xintercept = mean, color = group), linetype = "dashed", size = 1) +
+  # Customize appearance
+  labs(title = "Density Plot of Two Groups with ±1 SD Cross-Hatched Areas",
+       x = "Value",
+       y = "Density") +
+  scale_color_manual(values = c("group1" = "blue", "group2" = "red")) +
+  scale_fill_manual(values = c("group1" = "lightblue", "group2" = "pink")) +
+  scale_pattern_manual(values = c("group1" = "stripe", "group2" = "stripe")) +  # Assign pattern type
+  theme(legend.position = "none")  # Remove legend
+
+```
+
+# Variance
+
+$$S_{obs}^2 = S_{true}^2 + S_{error}^2$$
+
+Variance is good is some places.  Sometimes, it is the only thing we can control.  The more variance between groups, the more likely we can detect a difference.  The less variance within groups, the more likely we can detect a difference.  
+
+
+# Effect Sizes
+
+Cohen's d is one of the more widely used measures of effect size.  There are others.  I focus on this one because of its simplicity and its wide use.  It is defined as the difference between two means divided by the pooled standard deviation.
+
+$$\mbox{Cohen's d} = \frac{\bar{X}_{TX} - \bar{X}_{CTL}}{S_{pooled}}$$
+
+# where...
+
+$$S_{pooled} = \sqrt{\frac{(n_{TX} - 1)S_{TX}^2 + (n_{CTL} - 1)S_{CTL}^2}{n_{TX} + n_{CTL} - 2}}$$
+
+# Sample Size
+
+Many novice researchers begin with this question:  "How many subjects do I need?"  Today, I am going to show you how to answer that question but, more importantly, show you why that question is so limiting.  Bear with me.
+
+1. Big N GOOD; small N BAD.
+2. Law of Large Numbers: As $N \rightarrow \infty$:  $\bar{X} \rightarrow \mu$ and $S \rightarrow \sigma$.
+3. Sample size is purported to be the most important factor in power estimation.
+4. Sample size is (arguably) the most controllable factor in power estimation.
+
+# Why Compute Power?
+
+1.  Funding and your future success.
+2.  Learn to control what you can control.
+3.  Avoid wasting time.
+4.  More efficient use of scarce resources.
+
+# How to Compute Power
+
+1. Rough estimates using rules of thumb
+2. Point estimates from code or online calculators
+3. Simulation-based methods
+4. Bayesian methods (not really NHST)
+
+# Rough Estimates
+
+1. Measures of difference:  Group sizes of $n = 30$ for $80\%$ power; if smaller, no fewer than 7 per cell.
+2. Measures of association (r): $N > 50$ observations for $80\%$ power.
+3. Measurement Models (EFA, CFA):  $N > 300$ usually fine.
+
+# Point Estimates
+
+```{r PE}
+#| echo: false
+#| eval: true
+#| include: true
+#| message: false
+#| warning: false
+#| error: false
+
+# Load necessary libraries
+library(pwr)
+
+# compute power for a two-sample t-test using the data generated above
+PEpwrTest <- pwr.t.test(d = (mu2 - mu1) / sd1, n = n, sig.level = 0.05, power = NULL, type = "two.sample")
+```
+
+
+1. Get your numbers in order (effect size, alpha, sample size, etc.)
+2. Use a function or online calculator (see resources)
+3. The power for our data presented above is **`r paste(round(PEpwrTest$power, 2),"%")`**
+4. Record the observed power and report.
+
+# Simulation Methods
+
+Many to choose from but there are three basic types:
+
+1.  Generate Data (raw values) - Method 1
+2.  Generate Statistic (from parameters) - Method 2
+3.  Iterate on either (do many times) - Method 3
+
+I plan to discuss 1 & 3 below...
+
+## Method 1: Data Generative Simulation
+
+Watch each step as they unfold below
+
+## Step 1: Generate Data $\Rightarrow$ 
+
+```{r M1S1}
+#| echo: true
+#| eval: false
+#| include: true
+#| message: false
+#| warning: false
+#| error: false
+#| collapse: true
+
+# Define parameters
+n <- 30
+mu1 <- 0
+mu2 <- 0.5
+sd1 <- 1
+sd2 <- 1
+
+# Generate data for both groups
+group1 <- tibble(group = "group1", value = rnorm(n, mu1, sd1))
+group2 <- tibble(group = "group2", value = rnorm(n, mu2, sd2))
+data <- bind_rows(group1, group2)
+```
+
+## Step 2: Run Model $\Rightarrow$
+
+```{r M1S2}
+#| echo: true
+#| eval: false
+#| include: true
+#| message: false
+#| warning: false
+#| error: false
+#| collapse: true
+
+t.test(value ~ group, data = data)
+```
+
+## Step 3: Collect Results $\Rightarrow$
+
+```{r M1S3}
+#| echo: true
+#| eval: false
+#| include: true
+#| message: false
+#| warning: false
+#| error: false
+
+# Perform a two-sample independent t-test
+t_test_result <- t.test(value ~ group, data = data, var.equal = TRUE)
+
+names(t_test_result)
+```
+
+## Step 4: Repeat
+
+```{r M1S4}
+# Load the necessary libraries
+library(tidyverse)
+library(ggplot2)
+
+# Number of iterations
+k <- 100
+
+# Initialize vectors to store the p-values and test statistics
+p_values <- numeric(k)
+test_statistics <- numeric(k)
+
+# Run the iterations
+for (i in 1:k) {
+  # Simulate data for two groups
+  group_A <- rnorm(30, mean = 100, sd = 15)
+  group_B <- rnorm(30, mean = 105, sd = 15)
+  
+  # Combine the data into a dataframe
+  data <- tibble(
+    group = rep(c("A", "B"), each = 30),
+    value = c(group_A, group_B)
+  )
+  
+  # Perform a two-sample independent t-test
+  t_test_result <- t.test(value ~ group, data = data, var.equal = TRUE)
+  
+  # Store the p-value and test statistic
+  p_values[i] <- t_test_result$p.value
+  test_statistics[i] <- t_test_result$statistic
+}
+
+# Combine the results into a dataframe
+results <- tibble(
+  iteration = 1:k,
+  p_value = p_values,
+  test_statistic = test_statistics
+)
+
+# Calculate the mean p-value and the probability of p-value < 0.05
+mean_p_value <- mean(p_values)
+prob_p_value_below_0.05 <- mean(p_values < 0.05)
+
+# Create the plot
+plot <- ggplot(results, aes(x = iteration, y = p_value)) +
+  geom_point() +
+  geom_hline(yintercept = 0.05, linetype = "dashed", color = "red") +
+  labs(title = paste("P-values by Iteration", "\n", "Mean p-value: ", round(mean_p_value, 2), "; P(p-value < 0.05): ", round(prob_p_value_below_0.05, 2), sep=""), 
+       x = "Iteration",
+       y = "P-value")
+
+# Print the plot
+print(plot)
+```
+
+
+## Method 2: Statistic Generative Simulation
+
+Step 1: Generate Statistic $\Rightarrow$
+
+Step 2: Compute Probability $\Rightarrow$
+
+Step 3: Collect Results $\Rightarrow$
+
+Step 4: Repeat
+
+
+## Recommended Method
+
+1. Use a tool that already exists FIRST!
+2. Learn the model you are trying to use (lm, glm, lmer, etc.)
+3. Use a simulation-based method to evaluate your guesses and estimates.
+4. Lather, rinse, repeat.
+
+# Resources
+
+## Online Calculators
+<https://sammancuso.shinyapps.io/power/>
+<https://debruine.github.io/lmem_sim/index.html>
+<https://shiny.psy.gla.ac.uk/lmem_sim/>
+<https://shiny.psy.gla.ac.uk/Dale/crossed/>
+<https://shiny.ieis.tue.nl/anova_power/>
+<https://arcaldwell49.shinyapps.io/anova-exact/>
+<https://schoemanna.shinyapps.io/mc_power_med/>
+<https://designingexperiments.com/shiny-r-web-apps/>
+<https://aaron0696.shinyapps.io/BtwnANOVAPowSim/>
+
+## Free Books/Articles (*GMU auth req'd)
+<https://aaroncaldwell.us/SuperpowerBook/>
+
+[Simulation-Based Power Analysis for Factorial Designs*](https://journals-sagepub-com.mutex.gmu.edu/doi/10.1177/2515245920951503)
+
+[An article for an app*](https://journals-sagepub-com.mutex.gmu.edu/doi/full/10.1177/2515245920978738)
+
+## Git Resources
+
+<https://github.com/arcaldwell49/Superpower>

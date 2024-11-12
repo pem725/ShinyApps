@@ -100,13 +100,13 @@ ui <- page_sidebar(
     fill = FALSE,
     
   value_box(
-      title = "Statistical Power (a priori)",
+      title = "A Priori Power",
       value = textOutput("powerpe"),
       showcase = bsicons::bs_icon("battery-charging"),
       theme = "teal"    
   ),
   value_box(
-    title = "Statistical Power (post-hoc)",
+    title = "Post-hoc Power",
     value = textOutput("powerph"),
     showcase = bsicons::bs_icon("battery-charging"),
     theme = "pink"  
